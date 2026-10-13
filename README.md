@@ -1,0 +1,34 @@
+# Holy Rosary — Pray for One Another
+
+A free website where people share prayer intentions and pray the rosary for each other: **one decade for one person's intention**.
+
+> Status: early development. The live site currently shows a "coming soon" page.
+
+## How it works
+
+1. **Share an intention.** Write what you'd like prayed for, with an optional thank-you message for whoever prays for it.
+2. **Pray for others.** Choose a full rosary or any number of decades, and you're given that many intentions from other people.
+3. **Pray.** The rosary is shown bead by bead. White beads, the current one glowing yellow, and a Next button for each prayer.
+4. **Receive thanks.** When you finish, you see the thank-you messages left by the people you prayed for.
+
+## Principles
+
+- **Free, forever.** No ads, no fees, no paid features. Running costs are covered by the maintainer.
+- **Respectful.** Intentions are moderated before anyone prays for them, and anything abusive is removed.
+- **Private by default.** Only first names are asked for. No accounts are needed to pray or to submit an intention.
+
+## Technology
+
+- Plain HTML, CSS and JavaScript, with no build step
+- [Supabase](https://supabase.com) for the database (coming soon)
+- Hosted on [Netlify](https://www.netlify.com), which redeploys automatically on every push to `main`
+
+To run it locally, open `index.html` in a browser.
+
+## Contributing
+
+Help is welcome, especially with prayer translations, accessibility and design. See [CONTRIBUTING.md](CONTRIBUTING.md).
+
+## Licence
+
+See [LICENSE](LICENSE).
