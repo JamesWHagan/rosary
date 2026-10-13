@@ -183,7 +183,7 @@ body {
   .card .text p { font-size: 1.02rem; line-height: 1.55; }
 }
 
-/* ---------- choosing how to pray ---------- */
+/* ---------- setup screen ---------- */
 .choose {
   min-height: 100%; max-width: 480px; margin: 0 auto;
   display: flex; flex-direction: column; justify-content: center; gap: 14px;
@@ -219,3 +219,49 @@ body {
 .card details p { font-size: 1rem; line-height: 1.6; }
 .card .hint { color: var(--muted); font-size: .92rem; margin-top: 14px; }
 .topbar .link { font-size: .85rem; }
+
+.setup {
+  max-width: 480px; margin: 0 auto;
+  padding: 16px 16px calc(24px + env(safe-area-inset-bottom));
+  display: flex; flex-direction: column; gap: 18px;
+}
+.setup .back-home { align-self: flex-start; }
+.setup h2 { font-family: "Cormorant Garamond", Georgia, serif; font-weight: 600; font-size: 2.1rem; text-align: center; margin-top: 4px; }
+.setup .lead { text-align: center; color: var(--muted); line-height: 1.5; margin-top: -10px; }
+.field { display: grid; gap: 10px; }
+.field .label { font-size: .82rem; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+.field .fine { color: var(--muted); font-size: .88rem; line-height: 1.45; }
+.seg { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; }
+.seg button {
+  appearance: none; font: inherit; font-size: 1.25rem; font-weight: 600; color: var(--text);
+  background: var(--surface); border: 1px solid var(--line); border-radius: 14px;
+  min-height: 60px; cursor: pointer; display: grid; place-content: center; gap: 2px;
+}
+.seg button small { font-size: .62rem; font-weight: 500; color: var(--muted); letter-spacing: .02em; }
+.seg button[aria-pressed="true"] { background: var(--glow); border-color: var(--glow); color: var(--on-glow); }
+.seg button[aria-pressed="true"] small { color: var(--on-glow); }
+.modes { display: grid; gap: 10px; }
+.modes .choice { padding: 14px 16px; }
+.modes .choice[aria-pressed="true"] { border-color: var(--glow); box-shadow: inset 0 0 0 1px var(--glow); }
+.modes .choice[aria-pressed="true"] strong::after { content: " ✓"; color: var(--glow); }
+.assigned { list-style: none; display: grid; gap: 8px; }
+.assigned li { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 12px 14px; }
+.assigned .who { font-size: .8rem; color: var(--muted); margin-bottom: 3px; }
+.assigned p { line-height: 1.45; }
+.setup .start { width: 100%; position: sticky; bottom: calc(12px + env(safe-area-inset-bottom)); box-shadow: 0 8px 24px rgba(0,0,0,.15); }
+
+.for-line { font-size: .82rem; color: var(--muted); margin-bottom: 2px; }
+.for-line::before { content: "♥ "; color: var(--glow); }
+.intention { background: color-mix(in srgb, var(--glow) 12%, transparent); border-radius: 12px; padding: 12px 14px; margin: 4px 0 12px; }
+.intention .who { font-size: .82rem; color: var(--muted); margin-bottom: 4px; }
+.intention .what { font-size: 1.1rem; line-height: 1.5; }
+.card .text .intention p { font-size: inherit; }
+.card .text .intention .what { font-size: 1.1rem; }
+
+.thanks { list-style: none; display: grid; gap: 10px; width: 100%; max-width: 420px; text-align: left; }
+.thanks li { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 14px; }
+.thanks .who { font-size: .8rem; color: var(--muted); }
+.thanks .what { margin: 2px 0 8px; line-height: 1.45; }
+.thanks .msg { font-family: "Cormorant Garamond", Georgia, serif; font-size: 1.2rem; font-style: italic; color: var(--text); }
+.card.is-mystery .text .intention .what { color: var(--text); }
+.card.is-mystery .text .intention .who { color: var(--muted); font-size: .82rem; }

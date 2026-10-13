@@ -11,24 +11,49 @@
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-  <section class="choose" id="choose" hidden>
+  <section class="setup" id="setup" hidden>
     <a class="link back-home" href="./">← Home</a>
-    <h2>How would you like to pray?</h2>
-    <button class="choice" id="mode-beads" type="button">
-      <strong>Bead by bead</strong>
-      <span>Every prayer on screen, one at a time. Tap Next, or anywhere on the prayer, to move to the next bead.</span>
-    </button>
-    <button class="choice" id="mode-own" type="button">
-      <strong>With my own rosary</strong>
-      <span>Hold your own rosary and count on it. One screen per decade, so you only tap Next 7 times.</span>
-    </button>
-    <p class="fine">You can change this at any time.</p>
+    <h2>Pray for others</h2>
+    <p class="lead">Each decade you pray is for one person's intention.</p>
+
+    <div class="field">
+      <div class="label">How many decades?</div>
+      <div class="seg" id="decades">
+        <button type="button" data-n="1">1</button>
+        <button type="button" data-n="2">2</button>
+        <button type="button" data-n="3">3</button>
+        <button type="button" data-n="4">4</button>
+        <button type="button" data-n="5">5<small>Full rosary</small></button>
+      </div>
+      <p class="fine" id="setup-note"></p>
+    </div>
+
+    <div class="field">
+      <div class="label">How will you pray?</div>
+      <div class="modes" id="modes">
+        <button class="choice" type="button" data-mode="beads">
+          <strong>Bead by bead</strong>
+          <span>Every prayer on screen. Tap the prayer or Next to move on.</span>
+        </button>
+        <button class="choice" type="button" data-mode="own">
+          <strong>With my own rosary</strong>
+          <span>Count on your own beads. One screen per decade.</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="field">
+      <div class="label">You will pray for</div>
+      <ol class="assigned" id="assigned"></ol>
+      <p class="fine">These are sample intentions while we build the real ones.</p>
+    </div>
+
+    <button class="btn primary start" id="start" type="button">Start</button>
   </section>
 
   <div class="pray" id="prayer" hidden>
     <div class="topbar">
       <a class="link" href="./">← Home</a>
-      <button class="link" id="change-mode" type="button"><span id="mode-label"></span> ▾</button>
       <button class="link" id="restart" type="button">Start over</button>
     </div>
     <div class="where" id="where"></div>
@@ -39,6 +64,7 @@
     </div>
 
     <section class="card" id="card" aria-live="polite">
+      <div class="for-line" id="for-line" hidden></div>
       <div class="kicker" id="kicker"></div>
       <h2 id="prayer-title"></h2>
       <div class="text" id="prayer-text"></div>
@@ -52,7 +78,8 @@
 
   <section class="done" id="done" hidden>
     <h2 tabindex="-1">Amen.</h2>
-    <p>Thank you for praying the Rosary.</p>
+    <p id="done-lead"></p>
+    <ul class="thanks" id="thanks"></ul>
     <div class="actions">
       <button class="btn primary" id="again" type="button">Pray again</button>
       <a class="btn" href="./">Home</a>
@@ -62,6 +89,7 @@
   <div class="toast" id="toast" role="status" hidden></div>
 
   <script src="js/prayers.js"></script>
+  <script src="js/samples.js"></script>
   <script src="js/rosary.js"></script>
 </body>
 </html>

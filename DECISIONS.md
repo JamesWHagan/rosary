@@ -16,3 +16,5 @@ A record of choices made for Decade4U, so contributors know what was decided and
 - **Look:** calm and warm. White beads with a soft yellow glow on the active bead, a serif heading font (Cormorant Garamond), and a light or dark theme that follows the phone's own setting
 - **Bead direction:** beads are counted clockwise, going up the right-hand side from the medal
 - **Two ways to pray:** "Bead by bead" (every prayer on screen, 80 steps; tap the card or Next) and "With my own rosary" (one screen per decade, 7 steps) for people praying on a physical rosary
+- **Choosing decades:** people pray 1–5 decades, and each decade is assigned one other person's intention. Fewer than 5 decades uses the short version (just the Sign of the Cross before and after); 5 decades uses the full opening and closing prayers. Partial rosaries start from the first mystery of the day.
+- **Finish screen:** shows each intention prayed for, with that person's thank-you message (or a warm default)
