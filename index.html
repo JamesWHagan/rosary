@@ -2,130 +2,26 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Rosary2U — Coming Soon</title>
-  <meta name="description" content="Pray the rosary for one another's intentions. Coming soon.">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Rosary2U — Pray for One Another</title>
+  <meta name="description" content="Pray the rosary for one another's intentions.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=Inter:wght@400;500&display=swap" rel="stylesheet">
-  <style>
-    :root {
-      --bg: #faf7f2;
-      --text: #2b2622;
-      --muted: #7a7068;
-      --bead: #ffffff;
-      --bead-edge: #d9d1c6;
-      --glow: #f5c542;
-      --cord: #c9bfb2;
-    }
-    @media (prefers-color-scheme: dark) {
-      :root {
-        --bg: #16141a;
-        --text: #f1ece4;
-        --muted: #a39a90;
-        --bead: #f4f1ec;
-        --bead-edge: #8c847a;
-        --glow: #ffd257;
-        --cord: #4a4450;
-      }
-    }
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    html, body { height: 100%; }
-    body {
-      background: var(--bg);
-      color: var(--text);
-      font-family: "Inter", system-ui, sans-serif;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 24px 16px;
-      text-align: center;
-    }
-    main { max-width: 420px; width: 100%; }
-    .beads {
-      position: relative;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      width: 100%;
-      max-width: 300px;
-      margin: 0 auto 40px;
-    }
-    .beads::before {
-      content: "";
-      position: absolute;
-      left: 0; right: 0; top: 50%;
-      height: 2px;
-      background: var(--cord);
-      transform: translateY(-50%);
-    }
-    .bead {
-      position: relative;
-      width: 22px;
-      height: 22px;
-      border-radius: 50%;
-      background: var(--bead);
-      border: 1px solid var(--bead-edge);
-      animation: glow 10s infinite;
-    }
-    .bead:nth-child(1)  { animation-delay: 0s; }
-    .bead:nth-child(2)  { animation-delay: 1s; }
-    .bead:nth-child(3)  { animation-delay: 2s; }
-    .bead:nth-child(4)  { animation-delay: 3s; }
-    .bead:nth-child(5)  { animation-delay: 4s; }
-    .bead:nth-child(6)  { animation-delay: 5s; }
-    .bead:nth-child(7)  { animation-delay: 6s; }
-    .bead:nth-child(8)  { animation-delay: 7s; }
-    .bead:nth-child(9)  { animation-delay: 8s; }
-    .bead:nth-child(10) { animation-delay: 9s; }
-    @keyframes glow {
-      0%, 10%, 100% { background: var(--bead); box-shadow: none; }
-      3%, 7% {
-        background: var(--glow);
-        border-color: var(--glow);
-        box-shadow: 0 0 14px 4px color-mix(in srgb, var(--glow) 60%, transparent);
-      }
-    }
-    @media (prefers-reduced-motion: reduce) {
-      .bead { animation: none; }
-      .bead:nth-child(1) { background: var(--glow); border-color: var(--glow); }
-    }
-    h1 {
-      font-family: "Cormorant Garamond", Georgia, serif;
-      font-weight: 600;
-      font-size: clamp(2.2rem, 9vw, 3rem);
-      line-height: 1.1;
-      margin-bottom: 16px;
-    }
-    p {
-      color: var(--muted);
-      font-size: 1.05rem;
-      line-height: 1.6;
-    }
-    .soon {
-      display: inline-block;
-      margin-top: 28px;
-      padding: 8px 18px;
-      border: 1px solid var(--bead-edge);
-      border-radius: 999px;
-      font-size: 0.85rem;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      color: var(--text);
-    }
-  </style>
+  <link rel="stylesheet" href="css/style.css">
 </head>
-<body>
+<body class="home">
   <main>
-    <div class="beads" aria-hidden="true">
-      <span class="bead"></span><span class="bead"></span><span class="bead"></span>
-      <span class="bead"></span><span class="bead"></span><span class="bead"></span>
-      <span class="bead"></span><span class="bead"></span><span class="bead"></span>
-      <span class="bead"></span>
+    <div class="beads-row" aria-hidden="true">
+      <span></span><span></span><span></span><span></span><span></span>
+      <span></span><span></span><span></span><span></span><span></span>
     </div>
-    <h1>Rosary2U</h1>
+    <h1 class="serif">Rosary2U</h1>
     <p>Share your intention, and pray a decade for someone else's.</p>
-    <span class="soon">Coming soon</span>
+    <div class="actions">
+      <a class="btn primary" href="pray.html">Pray the Rosary</a>
+      <p class="soon">Sharing and praying for intentions is coming soon.</p>
+    </div>
   </main>
 </body>
 </html>

@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Pray the Rosary — Rosary2U</title>
+  <meta name="description" content="Pray the Holy Rosary, bead by bead.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div class="pray" id="prayer">
+    <div class="topbar">
+      <a class="link" href="./">← Home</a>
+      <button class="link" id="restart" type="button">Start over</button>
+    </div>
+    <div class="where" id="where"></div>
+    <div class="progress" aria-hidden="true"><div id="bar"></div></div>
+
+    <div class="rosary-wrap">
+      <svg id="rosary" viewBox="0 0 300 405" aria-hidden="true"></svg>
+    </div>
+
+    <section class="card" id="card" aria-live="polite">
+      <div class="kicker" id="kicker"></div>
+      <h2 id="prayer-title"></h2>
+      <div class="text" id="prayer-text"></div>
+    </section>
+
+    <nav class="controls">
+      <button class="btn" id="back" type="button">Back</button>
+      <button class="btn primary" id="next" type="button">Next</button>
+    </nav>
+  </div>
+
+  <section class="done" id="done" hidden>
+    <h2 tabindex="-1">Amen.</h2>
+    <p>Thank you for praying the Rosary.</p>
+    <div class="actions">
+      <button class="btn primary" id="again" type="button">Pray again</button>
+      <a class="btn" href="./">Home</a>
+    </div>
+  </section>
+
+  <div class="toast" id="toast" role="status" hidden></div>
+
+  <script src="js/prayers.js"></script>
+  <script src="js/rosary.js"></script>
+</body>
+</html>
