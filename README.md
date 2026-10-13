@@ -1,4 +1,4 @@
-# Rosary2U — Pray for One Another
+# Decade4U — Pray for One Another
 
 A free website where people share prayer intentions and pray the rosary for each other: **one decade for one person's intention**.
 
@@ -31,4 +31,4 @@ Help is welcome, especially with prayer translations, accessibility and design. 
 
 ## Licence
 
-Rosary2U is free software under the [GNU Affero General Public License v3.0](LICENSE). You may use, change and share it, but any modified version you run or share must stay open under the same licence.
+Decade4U is free software under the [GNU Affero General Public License v3.0](LICENSE). You may use, change and share it, but any modified version you run or share must stay open under the same licence.

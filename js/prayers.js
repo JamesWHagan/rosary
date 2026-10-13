@@ -1,5 +1,5 @@
 /*
- * Rosary2U: prayer texts and mysteries (English).
+ * Decade4U: prayer texts and mysteries (English).
  *
  * All the words people read while praying live in this one file, so they can
  * be checked and translated without touching the page code.
@@ -139,6 +139,12 @@ window.ROSARY_TEXT = {
     back: "Back",
     finish: "Amen",
     resumed: "Continuing where you left off.",
-    restartConfirm: "Start the rosary again from the beginning?"
+    restartConfirm: "Start the rosary again from the beginning?",
+    changeModeConfirm: "Change how you pray? This starts the rosary again from the beginning.",
+    modeBeadsShort: "Bead by bead",
+    modeOwnShort: "With my own rosary",
+    showPrayers: "Show the prayers",
+    ownHint: "Pray these on your own rosary, then press Next.",
+    ownDecadeHint: "Pray this decade on your own rosary, then press Next."
   }
 };

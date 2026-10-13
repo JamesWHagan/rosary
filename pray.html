@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <title>Pray the Rosary — Rosary2U</title>
+  <title>Pray the Rosary — Decade4U</title>
   <meta name="description" content="Pray the Holy Rosary, bead by bead.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -11,9 +11,24 @@
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-  <div class="pray" id="prayer">
+  <section class="choose" id="choose" hidden>
+    <a class="link back-home" href="./">← Home</a>
+    <h2>How would you like to pray?</h2>
+    <button class="choice" id="mode-beads" type="button">
+      <strong>Bead by bead</strong>
+      <span>Every prayer on screen, one at a time. Tap Next, or anywhere on the prayer, to move to the next bead.</span>
+    </button>
+    <button class="choice" id="mode-own" type="button">
+      <strong>With my own rosary</strong>
+      <span>Hold your own rosary and count on it. One screen per decade, so you only tap Next 7 times.</span>
+    </button>
+    <p class="fine">You can change this at any time.</p>
+  </section>
+
+  <div class="pray" id="prayer" hidden>
     <div class="topbar">
       <a class="link" href="./">← Home</a>
+      <button class="link" id="change-mode" type="button"><span id="mode-label"></span> ▾</button>
       <button class="link" id="restart" type="button">Start over</button>
     </div>
     <div class="where" id="where"></div>

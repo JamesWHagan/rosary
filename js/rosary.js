@@ -1,21 +1,27 @@
 /*
- * Rosary2U: the prayer page.
+ * Decade4U: the prayer page.
  *
- * How it works, in three parts:
- *  1. draw()        draws the rosary as an SVG picture and remembers each bead.
- *  2. buildSteps()  makes the ordered list of every prayer, each tied to a bead.
- *  3. show(i)       shows prayer number i: lights up its bead, writes its text.
- * The Next and Back buttons just call show() with i + 1 or i - 1.
+ * There are two ways to pray:
+ *  - "beads": every prayer is its own screen and Next moves one bead (80 steps).
+ *  - "own":   for people holding their own rosary; one screen per decade,
+ *             plus the opening and closing prayers (7 steps).
+ *
+ * How the code works, in three parts:
+ *  1. draw()            draws the rosary as an SVG picture and remembers each bead.
+ *  2. buildSteps(mode)  makes the ordered list of steps; each step lights up one or more beads.
+ *  3. show(i)           shows step number i: lights up its beads, writes its text.
  */
 (function () {
   "use strict";
 
   var T = window.ROSARY_TEXT;
   var NS = "http://www.w3.org/2000/svg";
-  var STORE_KEY = "rosary2u.progress.v1";
+  var STORE_KEY = "decade4u.progress.v1";
+  var MODE_KEY = "decade4u.mode";
 
   // ---------- 1. Drawing the rosary ----------
   // The loop is a circle; the medal sits at its bottom and the pendant hangs below.
+  // Beads are counted clockwise: from the medal up the right-hand side.
   var CX = 150, CY = 138, R = 118, SLOTS = 55;
   var beads = {}; // bead id -> SVG element
 
@@ -34,7 +40,6 @@
     el("feMergeNode", { in: "b" }, merge);
     el("feMergeNode", { in: "SourceGraphic" }, merge);
 
-    // the cord
     el("circle", { cx: CX, cy: CY, r: R, class: "cord" }, svg);
     el("line", { x1: CX, y1: CY + R, x2: CX, y2: 362, class: "cord" }, svg);
 
@@ -42,7 +47,7 @@
     // Loop bead i: decade d uses i = d*11 .. d*11+9, large beads are i = 10, 21, 32, 43.
     for (var i = 0; i < 54; i++) {
       var large = i % 11 === 10;
-      var a = ((90 + (i + 1) * 360 / SLOTS) * Math.PI) / 180;
+      var a = ((90 - (i + 1) * 360 / SLOTS) * Math.PI) / 180; // minus = clockwise on screen
       beads["S" + i] = el("circle", {
         cx: (CX + R * Math.cos(a)).toFixed(2),
         cy: (CY + R * Math.sin(a)).toFixed(2),
@@ -51,16 +56,13 @@
       }, svg);
     }
 
-    // centre medal
     beads.medal = el("ellipse", { cx: CX, cy: CY + R, rx: 8, ry: 10, class: "bead medal" }, svg);
 
     // pendant, from the medal down: P5 (large), P4, P3, P2, P1 (large)
-    var pendant = [["P5", 282, 6.5], ["P4", 300, 4.3], ["P3", 314, 4.3], ["P2", 328, 4.3], ["P1", 346, 6.5]];
-    pendant.forEach(function (p) {
+    [["P5", 282, 6.5], ["P4", 300, 4.3], ["P3", 314, 4.3], ["P2", 328, 4.3], ["P1", 346, 6.5]].forEach(function (p) {
       beads[p[0]] = el("circle", { cx: CX, cy: p[1], r: p[2], class: "bead" + (p[2] > 5 ? " large" : "") }, svg);
     });
 
-    // crucifix
     var cross = el("g", { class: "bead cross" }, svg);
     el("rect", { x: CX - 2.5, y: 360, width: 5, height: 40, rx: 1.5 }, cross);
     el("rect", { x: CX - 13, y: 370, width: 26, height: 5, rx: 1.5 }, cross);
@@ -73,32 +75,59 @@
     return d === 0 ? "P5" : "S" + (d * 11 - 1);
   }
 
-  function buildSteps() {
+  function buildBeadSteps() {
     var s = [];
-    s.push({ id: "sign", bead: "cross", part: "opening" });
-    s.push({ id: "creed", bead: "cross", part: "opening" });
-    s.push({ id: "our", bead: "P1", part: "opening" });
+    s.push({ id: "sign", beads: ["cross"], part: "opening" });
+    s.push({ id: "creed", beads: ["cross"], part: "opening" });
+    s.push({ id: "our", beads: ["P1"], part: "opening" });
     for (var n = 0; n < 3; n++) {
-      s.push({ id: "hail", bead: "P" + (2 + n), part: "opening", count: [n + 1, 3], note: T.openingNotes[n] });
+      s.push({ id: "hail", beads: ["P" + (2 + n)], part: "opening", count: [n + 1, 3], note: T.openingNotes[n] });
     }
-    s.push({ id: "glory", bead: "P5", part: "opening" });
+    s.push({ id: "glory", beads: ["P5"], part: "opening" });
 
     for (var d = 0; d < 5; d++) {
       var L = largeBeadFor(d);
       var after = d < 4 ? largeBeadFor(d + 1) : "medal";
-      s.push({ mystery: true, bead: L, part: "decade", d: d });
-      s.push({ id: "our", bead: L, part: "decade", d: d });
+      s.push({ mystery: true, beads: [L], part: "decade", d: d });
+      s.push({ id: "our", beads: [L], part: "decade", d: d });
       for (var j = 0; j < 10; j++) {
-        s.push({ id: "hail", bead: "S" + (d * 11 + j), part: "decade", d: d, count: [j + 1, 10] });
+        s.push({ id: "hail", beads: ["S" + (d * 11 + j)], part: "decade", d: d, count: [j + 1, 10] });
       }
-      s.push({ id: "glory", bead: after, part: "decade", d: d });
-      s.push({ id: "fatima", bead: after, part: "decade", d: d });
+      s.push({ id: "glory", beads: [after], part: "decade", d: d });
+      s.push({ id: "fatima", beads: [after], part: "decade", d: d });
     }
 
-    s.push({ id: "hhq", bead: "medal", part: "closing" });
-    s.push({ id: "closing", bead: "medal", part: "closing" });
-    s.push({ id: "sign", bead: "cross", part: "closing" });
+    s.push({ id: "hhq", beads: ["medal"], part: "closing" });
+    s.push({ id: "closing", beads: ["medal"], part: "closing" });
+    s.push({ id: "sign", beads: ["cross"], part: "closing" });
     return s;
+  }
+
+  function buildOwnRosarySteps() {
+    var s = [];
+    s.push({
+      group: true, part: "opening",
+      beads: ["cross", "P1", "P2", "P3", "P4"],
+      items: [["sign", 1], ["creed", 1], ["our", 1], ["hail", 3], ["glory", 1]]
+    });
+    for (var d = 0; d < 5; d++) {
+      var list = [largeBeadFor(d)];
+      for (var j = 0; j < 10; j++) list.push("S" + (d * 11 + j));
+      s.push({
+        group: true, mystery: true, part: "decade", d: d, beads: list,
+        items: [["our", 1], ["hail", 10], ["glory", 1], ["fatima", 1]]
+      });
+    }
+    s.push({
+      group: true, part: "closing",
+      beads: ["medal", "cross"],
+      items: [["hhq", 1], ["closing", 1], ["sign", 1]]
+    });
+    return s;
+  }
+
+  function buildSteps(mode) {
+    return mode === "own" ? buildOwnRosarySteps() : buildBeadSteps();
   }
 
   function todaysSet() {
@@ -114,33 +143,67 @@
   }
 
   // ---------- 3. Showing a step ----------
-  var steps = buildSteps();
   var setKey = todaysSet();
   var set = T.mysteries[setKey];
+  var mode = null;
+  var steps = [];
   var current = 0;
 
   var $ = function (id) { return document.getElementById(id); };
   var ui = {};
 
+  function para(parent, text, cls) {
+    var p = document.createElement("p");
+    if (cls) p.className = cls;
+    p.textContent = text;
+    parent.appendChild(p);
+    return p;
+  }
+
   function writeText(container, text) {
-    container.innerHTML = "";
-    text.split("\n").forEach(function (line) {
-      var p = document.createElement("p");
-      p.textContent = line;
-      container.appendChild(p);
+    text.split("\n").forEach(function (line) { para(container, line); });
+  }
+
+  function writeGroup(container, step) {
+    var ul = document.createElement("ul");
+    ul.className = "checklist";
+    step.items.forEach(function (it) {
+      var li = document.createElement("li");
+      li.textContent = T.prayers[it[0]].title + (it[1] > 1 ? " × " + it[1] : "");
+      ul.appendChild(li);
     });
+    container.appendChild(ul);
+
+    var details = document.createElement("details");
+    var summary = document.createElement("summary");
+    summary.textContent = T.ui.showPrayers;
+    details.appendChild(summary);
+    var seen = {};
+    step.items.forEach(function (it) {
+      if (seen[it[0]]) return;
+      seen[it[0]] = true;
+      var p = T.prayers[it[0]];
+      var h = document.createElement("h3");
+      h.textContent = p.title;
+      details.appendChild(h);
+      writeText(details, p.text);
+    });
+    container.appendChild(details);
+
+    para(container, step.part === "decade" ? T.ui.ownDecadeHint : T.ui.ownHint, "hint");
   }
 
   function show(i) {
     current = Math.max(0, Math.min(steps.length - 1, i));
     var step = steps[current];
 
-    // beads: earlier ones softly lit, current one glowing
-    var prayed = {};
-    for (var k = 0; k < current; k++) prayed[steps[k].bead] = true;
+    // beads: earlier ones softly lit, current ones glowing
+    var now = {}, prayed = {};
+    step.beads.forEach(function (b) { now[b] = true; });
+    for (var k = 0; k < current; k++) steps[k].beads.forEach(function (b) { prayed[b] = true; });
     for (var id in beads) {
-      beads[id].classList.toggle("active", id === step.bead);
-      beads[id].classList.toggle("prayed", !!prayed[id] && id !== step.bead);
+      beads[id].classList.toggle("active", !!now[id]);
+      beads[id].classList.toggle("prayed", !!prayed[id] && !now[id]);
     }
 
     // where we are
@@ -149,20 +212,25 @@
     else ui.where.textContent = fill(T.ui.decade, { n: step.d + 1 }) + " · " + fill(T.ui.mysteriesToday, { set: set.name });
 
     // the card
-    ui.card.classList.toggle("is-mystery", !!step.mystery);
+    ui.text.innerHTML = "";
+    ui.card.classList.toggle("is-mystery", !!step.mystery && !step.group);
+    ui.card.classList.toggle("is-group", !!step.group);
     if (step.mystery) {
       ui.kicker.textContent = fill(T.ui.mysteryTitle, { ordinal: T.ordinals[step.d], set: set.name });
       ui.title.textContent = set.list[step.d];
-      writeText(ui.text, T.ui.mysteryHint);
+    } else if (step.group) {
+      ui.kicker.textContent = "";
+      ui.title.textContent = step.part === "opening" ? T.ui.opening : T.ui.closing;
     } else {
       var p = T.prayers[step.id];
       ui.kicker.textContent = step.note || "";
       ui.title.textContent = p.title + (step.count ? " · " + step.count[0] + " of " + step.count[1] : "");
-      writeText(ui.text, p.text);
     }
+    if (step.group) writeGroup(ui.text, step);
+    else if (step.mystery) writeText(ui.text, T.ui.mysteryHint);
+    else writeText(ui.text, T.prayers[step.id].text);
     ui.card.scrollTop = 0;
 
-    // progress and buttons
     ui.bar.style.width = ((current / (steps.length - 1)) * 100).toFixed(1) + "%";
     ui.back.disabled = current === 0;
     ui.next.textContent = current === steps.length - 1 ? T.ui.finish : T.ui.next;
@@ -170,71 +238,100 @@
     save();
   }
 
-  // ---------- Remembering progress on this device ----------
+  // ---------- Remembering progress and mode on this device ----------
+  function storeGet(key) { try { return localStorage.getItem(key); } catch (e) { return null; } }
+  function storeSet(key, val) { try { localStorage.setItem(key, val); } catch (e) {} }
+  function storeDel(key) { try { localStorage.removeItem(key); } catch (e) {} }
+
   function save() {
-    try {
-      localStorage.setItem(STORE_KEY, JSON.stringify({ step: current, set: setKey, at: Date.now() }));
-    } catch (e) { /* storage unavailable: progress just isn't remembered */ }
-  }
-  function clearSaved() {
-    try { localStorage.removeItem(STORE_KEY); } catch (e) {}
+    storeSet(STORE_KEY, JSON.stringify({ step: current, set: setKey, mode: mode, at: Date.now() }));
   }
   function loadSaved() {
     try {
-      var s = JSON.parse(localStorage.getItem(STORE_KEY) || "null");
+      var s = JSON.parse(storeGet(STORE_KEY) || "null");
       var twelveHours = 12 * 60 * 60 * 1000;
-      if (s && s.set === setKey && Date.now() - s.at < twelveHours && s.step > 0 && s.step < steps.length) return s.step;
+      if (s && s.set === setKey && s.mode === mode && Date.now() - s.at < twelveHours && s.step > 0 && s.step < steps.length) return s.step;
     } catch (e) {}
     return 0;
   }
 
-  // ---------- Finish ----------
-  function finish() {
-    clearSaved();
-    ui.main.hidden = true;
-    ui.done.hidden = false;
-    ui.done.querySelector("h2").focus();
+  // ---------- Screens ----------
+  function screen(name) {
+    ui.choose.hidden = name !== "choose";
+    ui.main.hidden = name !== "pray";
+    ui.done.hidden = name !== "done";
   }
-  function restart() {
-    clearSaved();
-    ui.done.hidden = true;
-    ui.main.hidden = false;
-    show(0);
+
+  function start(newMode, resume) {
+    mode = newMode;
+    storeSet(MODE_KEY, mode);
+    steps = buildSteps(mode);
+    ui.modeLabel.textContent = mode === "own" ? T.ui.modeOwnShort : T.ui.modeBeadsShort;
+    ui.card.classList.toggle("tap-next", mode === "beads");
+    screen("pray");
+    var at = resume ? loadSaved() : 0;
+    show(at);
+    if (at > 0) {
+      ui.toast.textContent = T.ui.resumed;
+      ui.toast.hidden = false;
+      setTimeout(function () { ui.toast.hidden = true; }, 3500);
+    }
+  }
+
+  function next() {
+    if (current === steps.length - 1) {
+      storeDel(STORE_KEY);
+      screen("done");
+      ui.done.querySelector("h2").focus();
+    } else {
+      show(current + 1);
+    }
   }
 
   // ---------- Start ----------
   document.addEventListener("DOMContentLoaded", function () {
     ui = {
-      main: $("prayer"), done: $("done"), where: $("where"), card: $("card"),
+      choose: $("choose"), main: $("prayer"), done: $("done"), where: $("where"), card: $("card"),
       kicker: $("kicker"), title: $("prayer-title"), text: $("prayer-text"),
-      bar: $("bar"), back: $("back"), next: $("next"), toast: $("toast")
+      bar: $("bar"), back: $("back"), next: $("next"), toast: $("toast"), modeLabel: $("mode-label")
     };
     draw($("rosary"));
 
-    ui.next.addEventListener("click", function () {
-      if (current === steps.length - 1) finish(); else show(current + 1);
-    });
+    $("mode-beads").addEventListener("click", function () { start("beads", true); });
+    $("mode-own").addEventListener("click", function () { start("own", true); });
+
+    ui.next.addEventListener("click", next);
     ui.back.addEventListener("click", function () { show(current - 1); });
-    $("restart").addEventListener("click", function () {
-      if (current === 0 || window.confirm(T.ui.restartConfirm)) restart();
+
+    // In bead-by-bead mode, tapping the prayer card also moves on (easier than aiming for the button).
+    ui.card.addEventListener("click", function (e) {
+      if (mode !== "beads") return;
+      if (window.getSelection && String(window.getSelection())) return; // they were selecting text
+      next();
     });
-    $("again").addEventListener("click", restart);
+
+    $("restart").addEventListener("click", function () {
+      if (current === 0 || window.confirm(T.ui.restartConfirm)) start(mode, false);
+    });
+    $("change-mode").addEventListener("click", function () {
+      if (current === 0 || window.confirm(T.ui.changeModeConfirm)) {
+        storeDel(STORE_KEY);
+        screen("choose");
+      }
+    });
+    $("again").addEventListener("click", function () { start(mode, false); });
 
     document.addEventListener("keydown", function (e) {
       if (ui.main.hidden) return;
-      if (e.key === "ArrowRight") ui.next.click();
-      if (e.key === "ArrowLeft" && !ui.back.disabled) ui.back.click();
+      if (e.key === "ArrowRight") next();
+      if (e.key === "ArrowLeft" && !ui.back.disabled) show(current - 1);
     });
 
-    var start = loadSaved();
-    show(start);
-    if (start > 0) {
-      ui.toast.textContent = T.ui.resumed;
-      ui.toast.hidden = false;
-      setTimeout(function () { ui.toast.hidden = true; }, 3500);
-    }
+    var savedMode = storeGet(MODE_KEY);
+    if (savedMode === "beads" || savedMode === "own") start(savedMode, true);
+    else screen("choose");
   });
 
   // exposed only for testing
-  window.__rosary = { steps: steps };
+  window.__rosary = { stepsFor: buildSteps };
 })();

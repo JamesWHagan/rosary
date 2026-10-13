@@ -1,4 +1,4 @@
-/* Rosary2U shared styles: calm and warm, follows the phone's light/dark setting */
+/* Decade4U shared styles: calm and warm, follows the phone's light/dark setting */
 :root {
   --bg: #faf7f2;
   --surface: #ffffff;
@@ -182,3 +182,40 @@ body {
   .card h2 { font-size: 1.35rem; }
   .card .text p { font-size: 1.02rem; line-height: 1.55; }
 }
+
+/* ---------- choosing how to pray ---------- */
+.choose {
+  min-height: 100%; max-width: 480px; margin: 0 auto;
+  display: flex; flex-direction: column; justify-content: center; gap: 14px;
+  padding: 24px 16px calc(24px + env(safe-area-inset-bottom));
+}
+.choose .back-home { align-self: flex-start; }
+.choose h2 { font-family: "Cormorant Garamond", Georgia, serif; font-weight: 600; font-size: 2rem; text-align: center; margin: 8px 0 6px; }
+.choice {
+  appearance: none; text-align: left; font: inherit; color: var(--text); cursor: pointer;
+  background: var(--surface); border: 1px solid var(--line); border-radius: 18px;
+  padding: 18px; display: grid; gap: 6px; transition: border-color .2s, transform .08s;
+}
+.choice:hover, .choice:focus-visible { border-color: var(--glow); outline: none; }
+.choice:active { transform: scale(.98); }
+.choice strong { font-size: 1.15rem; font-weight: 600; }
+.choice span { color: var(--muted); line-height: 1.5; font-size: .98rem; }
+.choose .fine { text-align: center; color: var(--muted); font-size: .85rem; }
+
+/* ---------- own-rosary screens ---------- */
+.card.tap-next { cursor: pointer; }
+.card.is-group { border-color: var(--glow); }
+.checklist { list-style: none; display: grid; gap: 8px; margin: 2px 0 14px; }
+.checklist li {
+  font-size: 1.08rem; padding-left: 26px; position: relative;
+}
+.checklist li::before {
+  content: ""; position: absolute; left: 4px; top: .42em; width: 10px; height: 10px; border-radius: 50%;
+  background: var(--glow); box-shadow: 0 0 8px color-mix(in srgb, var(--glow) 60%, transparent);
+}
+.card details { border-top: 1px solid var(--line); padding-top: 10px; }
+.card summary { cursor: pointer; color: var(--muted); font-size: .95rem; padding: 4px 0; }
+.card details h3 { font-size: .95rem; font-weight: 600; margin: 12px 0 4px; }
+.card details p { font-size: 1rem; line-height: 1.6; }
+.card .hint { color: var(--muted); font-size: .92rem; margin-top: 14px; }
+.topbar .link { font-size: .85rem; }
