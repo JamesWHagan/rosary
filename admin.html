@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Admin — Decade4U</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/admin.css">
+</head>
+<body class="admin">
+  <!-- ---------- sign in ---------- -->
+  <form class="admin-login" id="login" hidden>
+    <h1>Decade4U admin</h1>
+    <label class="label" for="password">Admin password</label>
+    <input id="password" type="password" autocomplete="current-password" required>
+    <p class="field-error" id="login-error" hidden></p>
+    <button class="btn primary" type="submit">Sign in</button>
+    <p class="fine">The password is kept only until you close this tab.</p>
+  </form>
+
+  <!-- ---------- the admin page ---------- -->
+  <main class="admin-main" id="main" hidden>
+    <header class="admin-top">
+      <h1>Decade4U admin</h1>
+      <div>
+        <button class="link" id="refresh" type="button">↻ Refresh</button>
+        <button class="link" id="signout" type="button">Sign out</button>
+      </div>
+    </header>
+
+    <section class="balance" id="balance" aria-label="Balance"></section>
+
+    <nav class="tabs" role="tablist">
+      <button type="button" role="tab" data-tab="queue" aria-selected="true">Waiting for you <span id="n-queue"></span></button>
+      <button type="button" role="tab" data-tab="reported" aria-selected="false">Reported <span id="n-reported"></span></button>
+      <button type="button" role="tab" data-tab="recent" aria-selected="false">Approved <span id="n-recent"></span></button>
+    </nav>
+
+    <p class="tab-help" id="help"></p>
+    <ul class="items" id="items"></ul>
+  </main>
+
+  <div class="toast" id="toast" role="status" hidden></div>
+  <script src="js/admin.js"></script>
+</body>
+</html>

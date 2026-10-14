@@ -169,6 +169,12 @@ window.ROSARY_TEXT = {
     modeOwnShort: "With my own rosary",
     showPrayers: "Show the prayers",
     ownHint: "Pray these on your own rosary, then press Next.",
-    ownDecadeHint: "Pray this decade on your own rosary, then press Next."
+    ownDecadeHint: "Pray this decade on your own rosary, then press Next.",
+    report: "Report",
+    reportAsk: "Hide this intention and send it for review?",
+    reportYes: "Yes, hide it",
+    reportNo: "Cancel",
+    reportDone: "Thank you. It's hidden and will be reviewed.",
+    reportFail: "Couldn't send the report. Please try again."
   }
 };

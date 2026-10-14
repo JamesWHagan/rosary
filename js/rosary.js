@@ -237,9 +237,55 @@
       var p = document.createElement("p");
       p.textContent = it.intention;
       li.appendChild(top); li.appendChild(p);
+      if (!it.general) addReport(li, it, function () {
+        // a reported intention is hidden on the server; fetch a replacement
+        state.forIds = state.forIds.filter(function (id) { return id !== it.id; });
+        loadList();
+      });
       ui.assigned.appendChild(li);
     });
     ui.start.textContent = fill(state.n === 1 ? T.ui.startOne : T.ui.startMany, { n: state.n });
+  }
+
+  // ---------- Report an intention ----------
+  // A small "Report" link. Asking twice (Report → "Yes, hide it") prevents accidental taps.
+  // The intention is hidden for everyone at once and goes to the maintainer's admin page.
+  function addReport(li, it, after) {
+    var row = document.createElement("div");
+    row.className = "report-row";
+    var btn = document.createElement("button");
+    btn.type = "button"; btn.className = "report-link"; btn.textContent = T.ui.report;
+    row.appendChild(btn);
+    btn.addEventListener("click", function () {
+      row.innerHTML = "";
+      var q = document.createElement("span"); q.textContent = T.ui.reportAsk;
+      var yes = document.createElement("button"); yes.type = "button"; yes.className = "report-link strong"; yes.textContent = T.ui.reportYes;
+      var no = document.createElement("button"); no.type = "button"; no.className = "report-link"; no.textContent = T.ui.reportNo;
+      row.appendChild(q); row.appendChild(yes); row.appendChild(no);
+      no.addEventListener("click", function () { row.innerHTML = ""; row.appendChild(btn); });
+      yes.addEventListener("click", function () {
+        yes.disabled = true;
+        Intentions.report(it.id).then(function (r) {
+          row.innerHTML = "";
+          var done = document.createElement("span");
+          done.textContent = (r && r.ok) ? T.ui.reportDone : ((r && r.error) || T.ui.reportFail);
+          row.appendChild(done);
+          if (r && r.ok) {
+            li.classList.add("reported");
+            showToast(T.ui.reportDone);
+            if (after) setTimeout(after, 900);
+          }
+        });
+      });
+    });
+    li.appendChild(row);
+  }
+
+  function showToast(msg) {
+    ui.toast.textContent = msg;
+    ui.toast.hidden = false;
+    clearTimeout(showToast.t);
+    showToast.t = setTimeout(function () { ui.toast.hidden = true; }, 3000);
   }
 
   // ---------- Prayer screens ----------
@@ -475,6 +521,7 @@
       para(li, it.general ? T.ui.generalShort : who(it), "who");
       para(li, it.intention, "what");
       if (!it.general) para(li, "“" + (it.thanks || T.ui.defaultThanks) + "”", "msg");
+      if (!it.general) addReport(li, it);
       ui.thanks.appendChild(li);
     });
     if (window.DecadeStats) {

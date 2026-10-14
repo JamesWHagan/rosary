@@ -574,3 +574,10 @@ html:has(.pray:not([hidden])), body:has(.pray:not([hidden])) { overscroll-behavi
 /* while the rosary grows or shrinks, skip the costly blur glow and pulse so every frame is drawn */
 .pray.animating #rosary .bead.active { filter: none; animation: none; }
 .pray.animating #rosary .ripple { display: none; }
+
+/* ---------- report an intention ---------- */
+.report-row { display: flex; flex-wrap: wrap; gap: 4px 12px; align-items: center; justify-content: flex-end; margin-top: 6px; font-size: .8rem; color: var(--muted); }
+.report-link { background: none; border: 0; font: inherit; color: var(--muted); cursor: pointer; padding: 4px 2px; text-decoration: underline; text-underline-offset: 2px; }
+.report-link.strong { color: #c0392b; font-weight: 500; }
+.report-link:disabled { opacity: .5; }
+.assigned li.reported, .thanks li.reported { opacity: .55; }

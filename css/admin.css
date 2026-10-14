@@ -1,0 +1,50 @@
+/* Decade4U admin page: plain and practical, works on a phone */
+.admin { min-height: 100%; }
+.admin h1 { font-family: "Cormorant Garamond", Georgia, serif; font-weight: 600; font-size: 1.7rem; }
+.admin .label { font-size: .82rem; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+.admin .fine { color: var(--muted); font-size: .85rem; }
+
+.admin-login { max-width: 360px; margin: 12vh auto 0; padding: 0 16px; display: grid; gap: 12px; }
+.admin-login input {
+  font: inherit; font-size: 1rem; padding: 12px 14px; border-radius: 12px;
+  border: 1px solid var(--line); background: var(--surface); color: var(--text);
+}
+.admin-login input:focus { outline: 2px solid var(--glow); border-color: var(--glow); }
+
+.admin-main { max-width: 860px; margin: 0 auto; padding: 16px 16px 60px; }
+.admin-top { display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap; }
+
+.balance { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; margin: 16px 0; }
+.balance div { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 12px 14px; }
+.balance strong { display: block; font-size: 1.5rem; font-weight: 600; }
+.balance span { font-size: .8rem; color: var(--muted); }
+.balance .warn { border-color: #d98c1f; }
+.balance .warn strong { color: #c46f00; }
+
+.tabs { display: flex; gap: 6px; overflow-x: auto; border-bottom: 1px solid var(--line); margin-top: 8px; }
+.tabs button {
+  appearance: none; border: 0; background: none; font: inherit; color: var(--muted); cursor: pointer;
+  padding: 10px 12px; border-bottom: 3px solid transparent; white-space: nowrap;
+}
+.tabs button[aria-selected="true"] { color: var(--text); border-bottom-color: var(--glow); font-weight: 500; }
+.tabs span:not(:empty) {
+  display: inline-block; min-width: 1.6em; padding: 0 6px; border-radius: 999px; font-size: .78rem;
+  background: var(--glow); color: var(--on-glow); text-align: center; margin-left: 4px;
+}
+.tab-help { color: var(--muted); font-size: .88rem; margin: 12px 0; line-height: 1.45; }
+
+.items { list-style: none; display: grid; gap: 12px; }
+.items .empty { color: var(--muted); text-align: center; padding: 30px 0; }
+.item { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 14px; display: grid; gap: 8px; }
+.item.care { border: 2px solid #d98c1f; }
+.item .meta { display: flex; gap: 8px; flex-wrap: wrap; font-size: .8rem; color: var(--muted); align-items: center; }
+.item .badge { border-radius: 999px; padding: 2px 9px; font-size: .75rem; background: color-mix(in srgb, var(--glow) 25%, transparent); color: var(--text); }
+.item .badge.care { background: #d98c1f; color: #fff; }
+.item .text { font-size: 1.05rem; line-height: 1.45; white-space: pre-wrap; overflow-wrap: anywhere; }
+.item .thanks-msg { color: var(--muted); font-style: italic; overflow-wrap: anywhere; }
+.item .why { font-size: .82rem; color: var(--muted); }
+.item .care-note { font-size: .88rem; background: color-mix(in srgb, #d98c1f 12%, transparent); border-radius: 10px; padding: 8px 10px; line-height: 1.4; }
+.item .acts { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 4px; }
+.item .acts .btn { min-height: 42px; padding: 8px 18px; font-size: .95rem; }
+.item .acts .btn.danger { border-color: #c0392b; color: #c0392b; }
+.item.leaving { opacity: .35; pointer-events: none; transition: opacity .2s; }

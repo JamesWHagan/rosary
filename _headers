@@ -2,3 +2,7 @@
 # so updates reach phones immediately (unchanged files still load from cache).
 /*
   Cache-Control: no-cache
+
+# Keep the admin page out of search engines.
+/admin.html
+  X-Robots-Tag: noindex, nofollow
