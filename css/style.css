@@ -397,3 +397,28 @@ body {
 .all-prayed { margin-top: 22px; color: var(--muted); }
 .home .need { margin-top: 28px; }
 .home #home-stat .stat { margin-top: 26px; }
+
+/* ---------- golden glow around intention boxes ---------- */
+.assigned li, .thanks li, .need li, .intention {
+  border: 1px solid color-mix(in srgb, var(--glow) 45%, var(--line));
+  box-shadow:
+    0 0 0 1px color-mix(in srgb, var(--glow) 12%, transparent),
+    0 0 18px color-mix(in srgb, var(--glow) 20%, transparent),
+    inset 0 0 14px color-mix(in srgb, var(--glow) 6%, transparent);
+}
+.assigned li, .thanks li { animation: glowin .6s ease-out both; }
+.assigned li:nth-child(2), .thanks li:nth-child(2) { animation-delay: .08s; }
+.assigned li:nth-child(3), .thanks li:nth-child(3) { animation-delay: .16s; }
+.assigned li:nth-child(4), .thanks li:nth-child(4) { animation-delay: .24s; }
+.assigned li:nth-child(5), .thanks li:nth-child(5) { animation-delay: .32s; }
+@keyframes glowin { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .assigned li, .thanks li { animation: none; } }
+@media (prefers-color-scheme: dark) {
+  .assigned li, .thanks li, .need li, .intention {
+    border-color: color-mix(in srgb, var(--glow) 55%, var(--line));
+    box-shadow:
+      0 0 0 1px color-mix(in srgb, var(--glow) 15%, transparent),
+      0 0 22px color-mix(in srgb, var(--glow) 26%, transparent),
+      inset 0 0 16px color-mix(in srgb, var(--glow) 8%, transparent);
+  }
+}
