@@ -177,7 +177,7 @@
   // ---------- State ----------
   var setKey = todaysSet();
   var set = T.mysteries[setKey];
-  var state = { mode: "beads", n: 5, order: shuffledIndexes(), hide: false };
+  var state = { mode: "beads", n: 5, order: shuffledIndexes(), hide: false, done: [] };
   var steps = [];
   var current = 0;
 
@@ -192,7 +192,7 @@
   function storeDel(key) { try { localStorage.removeItem(key); } catch (e) {} }
 
   function save() {
-    storeSet(STORE_KEY, JSON.stringify({ step: current, set: setKey, mode: state.mode, n: state.n, order: state.order, at: Date.now() }));
+    storeSet(STORE_KEY, JSON.stringify({ step: current, set: setKey, mode: state.mode, n: state.n, order: state.order, done: state.done, at: Date.now() }));
   }
   function loadSaved() {
     try {
@@ -399,6 +399,10 @@
       para(li, "“" + (it.thanks || T.ui.defaultThanks) + "”", "msg");
       ui.thanks.appendChild(li);
     });
+    if (window.DecadeStats) {
+      var total = window.DecadeStats.prayedFor();
+      window.DecadeStats.ring($("done-stat"), total, total === 1 ? T.ui.statOne : T.ui.statMany, Math.max(0, total - state.done.length));
+    }
   }
 
   // ---------- Screens ----------
@@ -412,6 +416,7 @@
 
   function openSetup(newIntentions) {
     storeDel(STORE_KEY);
+    state.done = [];
     if (newIntentions) state.order = shuffledIndexes();
     renderSetup();
     screen("setup");
@@ -431,6 +436,12 @@
   }
 
   function next() {
+    // A decade counts as prayed only when its last prayer is passed.
+    var st = steps[current];
+    if (st.endsDecade && state.done.indexOf(st.d) === -1) {
+      state.done.push(st.d);
+      if (window.DecadeStats) window.DecadeStats.addDecade();
+    }
     if (current === steps.length - 1) {
       storeDel(STORE_KEY);
       renderDone();
@@ -513,6 +524,7 @@
     var saved = loadSaved();
     if (saved && (saved.mode === "beads" || saved.mode === "own") && saved.n >= 1 && saved.n <= 5 && saved.order) {
       state.mode = saved.mode; state.n = saved.n; state.order = saved.order;
+      state.done = Array.isArray(saved.done) ? saved.done : [];
       begin(Math.min(saved.step, buildSteps(state.mode, state.n).length - 1));
       ui.toast.textContent = T.ui.resumed;
       ui.toast.hidden = false;

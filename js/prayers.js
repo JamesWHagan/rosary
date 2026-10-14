@@ -141,6 +141,8 @@ window.ROSARY_TEXT = {
     resumed: "Continuing where you left off.",
     restartConfirm: "Stop and go back to the start? Your progress will be lost.",
     anonymous: "Someone",
+    statOne: "person you have prayed for",
+    statMany: "people you have prayed for",
     hidePrayersBtn: "Hide prayers",
     hintBeads: "Tap the rosary or swipe left for the next bead · swipe right to go back",
     hintOwn: "Swipe left for the next decade · swipe right to go back",

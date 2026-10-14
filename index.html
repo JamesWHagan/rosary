@@ -18,10 +18,22 @@
     </div>
     <h1 class="serif">Decade4U</h1>
     <p>Share your intention, and pray a decade for someone else's.</p>
+    <div id="home-stat" hidden></div>
     <div class="actions">
       <a class="btn primary" href="pray.html">Pray for others</a>
       <p class="soon">Sharing your own intention is coming soon.</p>
     </div>
   </main>
+  <script src="js/stats.js"></script>
+  <script>
+    (function () {
+      var n = DecadeStats.prayedFor();
+      if (n > 0) {           // no sad zero: the ring appears after your first decade
+        var host = document.getElementById("home-stat");
+        host.hidden = false;
+        DecadeStats.ring(host, n, n === 1 ? "person you have prayed for" : "people you have prayed for");
+      }
+    })();
+  </script>
 </body>
 </html>

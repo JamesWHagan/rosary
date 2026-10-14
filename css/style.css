@@ -12,6 +12,7 @@
   --cord: #bdb1a1;
   --on-glow: #2b2310;
   --glow-text: #a8780a;
+  --spark: #e0a91c;
 }
 @media (prefers-color-scheme: dark) {
   :root {
@@ -27,6 +28,7 @@
     --cord: #4a4450;
     --on-glow: #2b2310;
     --glow-text: #ffd257;
+    --spark: #fff6d6;
   }
 }
 
@@ -326,3 +328,25 @@ body {
   text-align: center; color: var(--muted); font-size: .82rem; line-height: 1.4;
   padding: 0 8px 6px;
 }
+
+/* ---------- golden counter ring ---------- */
+.stat { display: flex; flex-direction: column; align-items: center; gap: 8px; margin: 26px auto 4px; }
+.stat-ring { position: relative; width: 132px; height: 132px; }
+.stat-ring svg { width: 100%; height: 100%; overflow: visible; }
+.stat-ring .track { fill: none; stroke: color-mix(in srgb, var(--glow) 22%, transparent); stroke-width: 5; }
+.stat-ring .arc {
+  fill: none; stroke-width: 5; stroke-linecap: round;
+  stroke-dasharray: 120 207; /* a golden arc about a third of the way round */
+  filter: drop-shadow(0 0 4px color-mix(in srgb, var(--glow) 70%, transparent));
+}
+.stat-ring .spark { fill: var(--spark); filter: drop-shadow(0 0 5px #f5c542); }
+.stat-ring .spin { transform-origin: 60px 60px; animation: spin 6s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.stat-num {
+  position: absolute; inset: 0; display: grid; place-items: center;
+  font-family: "Cormorant Garamond", Georgia, serif; font-weight: 600; font-size: 2.9rem;
+  color: var(--glow-text); text-shadow: 0 0 18px color-mix(in srgb, var(--glow) 45%, transparent);
+}
+.stat-label { color: var(--muted); font-size: .92rem; letter-spacing: .02em; }
+@media (prefers-reduced-motion: reduce) { .stat-ring .spin { animation: none; } }
+.done #done-stat .stat { margin-top: 8px; }
