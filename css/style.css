@@ -336,7 +336,9 @@ body {
 .pray.hide-prayers .strip-int { -webkit-line-clamp: 2; }
 
 /* the whole prayer screen listens for sideways swipes; vertical scrolling still works */
-.pray { touch-action: pan-y; user-select: none; -webkit-user-select: none; }
+/* The prayer screen handles all swipes itself (left/right/up/down); only the prayer text scrolls. */
+.pray { touch-action: none; user-select: none; -webkit-user-select: none; overscroll-behavior: none; }
+.pray .card { touch-action: pan-y; overscroll-behavior: contain; }
 .pray .card .text { user-select: text; -webkit-user-select: text; }
 .pray.hide-prayers .controls { display: none; }
 .pray.hide-prayers .strip { margin-bottom: 8px; }
@@ -556,3 +558,14 @@ body {
 .btn:disabled { opacity: .5; cursor: default; }
 
 .need .waiting { color: var(--muted); font-size: .88rem; text-align: center; margin: -4px 0 12px; }
+
+/* the whole page never "pulls to refresh" while praying */
+html:has(.pray:not([hidden])), body:has(.pray:not([hidden])) { overscroll-behavior: none; }
+
+/* phones, prayers shown: give the intention room (up to 3 lines) and make the rosary a little smaller */
+@media (max-width: 899px) {
+  .pray:not(.hide-prayers) #rosary { height: clamp(130px, 27vh, 300px); height: clamp(130px, 27dvh, 300px); }
+  .pray:not(.hide-prayers) .strip-int { -webkit-line-clamp: 3; }
+  .pray:not(.hide-prayers) .strip { padding: 9px 14px; }
+  .pray:not(.hide-prayers) .strip-myst { font-size: 1.05rem; }
+}
