@@ -569,3 +569,16 @@ html:has(.pray:not([hidden])), body:has(.pray:not([hidden])) { overscroll-behavi
   .pray:not(.hide-prayers) .strip { padding: 9px 14px; }
   .pray:not(.hide-prayers) .strip-myst { font-size: 1.05rem; }
 }
+
+/* ---------- smooth show/hide of the prayers (View Transitions) ---------- */
+.pray .rosary-wrap { view-transition-name: ring; }
+.pray .strip { view-transition-name: strip; }
+.pray .card { view-transition-name: card; }
+.pray .controls { view-transition-name: controls; }
+.pray .gesture-hint { view-transition-name: hint; }
+::view-transition-group(*) { animation-duration: .45s; animation-timing-function: cubic-bezier(.22, .8, .24, 1); }
+::view-transition-old(*), ::view-transition-new(*) { animation-duration: .35s; }
+::view-transition-old(card), ::view-transition-old(controls) { animation-duration: .2s; }
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*), ::view-transition-old(*), ::view-transition-new(*) { animation: none !important; }
+}

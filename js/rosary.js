@@ -376,7 +376,18 @@
     ui.hint.hidden = true;
   }
 
-  function applyHide() {
+  // Showing/hiding the prayers glides smoothly where the browser supports it
+  // (the rosary grows or shrinks, the prayer text and buttons fade).
+  function applyHide(animate) {
+    var reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (animate && document.startViewTransition && !reduce) {
+      document.startViewTransition(function () { applyHideNow(); });
+    } else {
+      applyHideNow();
+    }
+  }
+
+  function applyHideNow() {
     ui.main.classList.toggle("hide-prayers", state.hide);
     updateHint();
     ui.hide.textContent = state.hide ? T.ui.showPrayersBtn : T.ui.hidePrayersBtn;
@@ -514,11 +525,11 @@
       } else if (!onText && Math.abs(dy) > 70 && Math.abs(dy) > Math.abs(dx) * 1.5) {
         justSwiped = Date.now();
         var hide = dy > 0;            // finger moved down = hide, up = show
-        if (hide !== state.hide) { state.hide = hide; applyHide(); }
+        if (hide !== state.hide) { state.hide = hide; applyHide(true); }
       }
     });
 
-    ui.hide.addEventListener("click", function () { state.hide = !state.hide; applyHide(); });
+    ui.hide.addEventListener("click", function () { state.hide = !state.hide; applyHide(true); });
     $("restart").addEventListener("click", function () {
       if (current === 0 || window.confirm(T.ui.restartConfirm)) openSetup(false);
     });
