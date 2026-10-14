@@ -111,6 +111,7 @@
         s.push({ id: "hail", beads: ["P" + (2 + k)], part: "opening", count: [k + 1, 3], note: T.openingNotes[k] });
       }
       s.push({ id: "glory", beads: ["P5"], part: "opening" });
+      s.push({ id: "fatima", beads: ["P5"], part: "opening" });
     }
     for (var d = 0; d < n; d++) {
       var L = largeBeadFor(d);
@@ -135,7 +136,7 @@
     var full = n === 5, s = [];
     s.push(full
       ? { group: true, part: "opening", beads: ["cross", "P1", "P2", "P3", "P4"],
-          items: [["sign", 1], ["creed", 1], ["our", 1], ["hail", 3], ["glory", 1]] }
+          items: [["sign", 1], ["creed", 1], ["our", 1], ["hail", 3], ["glory", 1], ["fatima", 1]] }
       : { group: true, part: "opening", beads: ["cross"], items: [["sign", 1]] });
     for (var d = 0; d < n; d++) {
       var list = [largeBeadFor(d)];
