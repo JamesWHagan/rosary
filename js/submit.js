@@ -118,21 +118,32 @@
         intention.focus();
         return;
       }
-      var entry = {
-        id: "local-" + Date.now(),
+      var send = $("send");
+      send.disabled = true;
+      send.textContent = "Sharing…";
+      Intentions.submit({
         name: shownName(),
         intention: intention.value.trim().slice(0, LIMITS.intention),
-        thanks: thanks.value.trim().slice(0, LIMITS.thanks),
-        care: checkCare(),
-        status: "test",
-        at: Date.now()
-      };
-      saveMine(entry);
-      $("sent-intention").textContent = entry.intention;
-      $("form").hidden = true;
-      $("sent").hidden = false;
-      window.scrollTo(0, 0);
-      $("sent").querySelector("h2").focus();
+        thanks: thanks.value.trim().slice(0, LIMITS.thanks)
+      }).then(function (r) {
+        send.disabled = false;
+        send.textContent = "Share my intention";
+        if (!r.ok) {
+          err.textContent = r.error || "Something went wrong. Please try again.";
+          err.hidden = false;
+          intention.focus();
+          return;
+        }
+        saveMine({ id: r.id, intention: intention.value.trim(), status: r.status, at: Date.now() });
+        $("sent-lead").textContent = r.status === "approved"
+          ? "Your intention has been received, and people can now pray a decade for you."
+          : "Your intention has been received. Once it has been read, people will begin praying a decade for you.";
+        $("sent-intention").textContent = intention.value.trim();
+        $("form").hidden = true;
+        $("sent").hidden = false;
+        window.scrollTo(0, 0);
+        $("sent").querySelector("h2").focus();
+      });
     });
 
     updateName();

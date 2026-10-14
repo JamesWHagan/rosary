@@ -551,3 +551,8 @@ body {
 .invite { display: grid; gap: 10px; margin-top: 8px; }
 .invite-q { font-weight: 500; }
 .test-note { color: var(--muted); }
+
+.assigned li.loading { color: var(--muted); border-style: dashed; animation: none; box-shadow: none; }
+.btn:disabled { opacity: .5; cursor: default; }
+
+.need .waiting { color: var(--muted); font-size: .88rem; text-align: center; margin: -4px 0 12px; }
