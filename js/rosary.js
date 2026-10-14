@@ -396,14 +396,61 @@
     ui.hint.hidden = true;
   }
 
-  // Showing/hiding the prayers glides smoothly where the browser supports it
-  // (the rosary grows or shrinks, the prayer text and buttons fade).
+  // Showing/hiding the prayers glides smoothly ("FLIP" animation):
+  // we measure where things are, switch the layout at once, then slide/scale them
+  // from the old place to the new one using only transform and opacity, which the
+  // phone's graphics chip draws at the screen's full refresh rate (60, 90 or 120Hz).
+  var animating = false;
   function applyHide(animate) {
     var reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    if (animate && document.startViewTransition && !reduce) {
-      document.startViewTransition(function () { applyHideNow(); });
-    } else {
+    if (!animate || reduce || !Element.prototype.animate || animating) { applyHideNow(); return; }
+    animating = true;
+    var main = ui.main;
+    main.classList.add("animating"); // pauses the bead glow while things move
+    var fading = [main.querySelector(".card"), main.querySelector(".controls")];
+    var EASE = "cubic-bezier(.22, .8, .24, 1)";
+
+    function flip() {
+      var moving = [document.getElementById("rosary"), document.getElementById("strip")];
+      var before = moving.map(function (el) { return el.getBoundingClientRect(); });
       applyHideNow();
+      var done = 0;
+      moving.forEach(function (el, i) {
+        var a = before[i], b = el.getBoundingClientRect();
+        if (!b.width || !b.height) { done++; return; }
+        var dx = a.left - b.left, dy = a.top - b.top, k = 1;
+        if (i === 0) {
+          // the beads are drawn centred inside the svg box, so match the beads, not the box
+          var fa = Math.min(a.width / 300, a.height / 405), fb = Math.min(b.width / 300, b.height / 405);
+          k = fa / fb;
+          dx = a.left + (a.width - 300 * fa) / 2 - b.left - k * (b.width - 300 * fb) / 2;
+          dy = a.top + (a.height - 405 * fa) / 2 - b.top - k * (b.height - 405 * fb) / 2;
+        }
+        var anim = el.animate([
+          { transformOrigin: "0 0", transform: "translate(" + dx + "px," + dy + "px) scale(" + k + ")" },
+          { transformOrigin: "0 0", transform: "none" }
+        ], { duration: 450, easing: EASE });
+        anim.onfinish = anim.oncancel = function () { if (++done === moving.length) finish(); };
+      });
+      if (done === moving.length) finish();
+      if (!state.hide) {
+        fading.forEach(function (el) {
+          if (el) el.animate([{ opacity: 0, transform: "translateY(12px)" }, { opacity: 1, transform: "none" }],
+            { duration: 320, delay: 140, easing: EASE, fill: "backwards" });
+        });
+      }
+      if (!ui.hint.hidden) ui.hint.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 300, delay: 200, fill: "backwards" });
+    }
+    function finish() { animating = false; main.classList.remove("animating"); }
+
+    if (state.hide) {
+      // fade the prayer and buttons out first, then let the rosary grow
+      var out = fading.filter(Boolean).map(function (el) {
+        return el.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 140, easing: "ease-out", fill: "forwards" });
+      });
+      out[0].onfinish = function () { flip(); out.forEach(function (a) { a.cancel(); }); };
+    } else {
+      flip();
     }
   }
 
