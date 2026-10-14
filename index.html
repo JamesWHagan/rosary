@@ -12,13 +12,16 @@
 </head>
 <body class="home">
   <main>
-    <div class="beads-row" aria-hidden="true">
-      <span></span><span></span><span></span><span></span><span></span>
-      <span></span><span></span><span></span><span></span><span></span>
-    </div>
-    <h1 class="serif">Decade4U</h1>
-    <p>Share your intention, and pray a decade for someone else's.</p>
-    <div id="home-stat" hidden></div>
+    <header class="hero">
+      <div class="beads-row" aria-hidden="true">
+        <span></span><span></span><span></span><span></span><span></span>
+        <span></span><span></span><span></span><span></span><span></span>
+      </div>
+      <h1 class="serif">Decade4U</h1>
+      <p class="tagline">One decade. One person. One prayer.</p>
+      <p class="intro">Pray the Holy Rosary for people who asked for prayer. Every decade you pray is for someone else's intention.</p>
+    </header>
+
     <section class="need" id="need" hidden>
       <h2 id="need-title"></h2>
       <ul id="need-list"></ul>
@@ -26,10 +29,16 @@
     </section>
     <p class="all-prayed" id="all-prayed" hidden>Everyone has been prayed for. Thank you 🙏</p>
 
+    <div id="home-stat" hidden></div>
+
     <div class="actions">
-      <a class="btn" id="pray-others" href="pray.html">Pray for others</a>
+      <a class="btn" id="pray-others" href="pray.html">Choose how many decades</a>
       <p class="soon">Sharing your own intention is coming soon.</p>
     </div>
+
+    <footer class="foot">
+      Free forever · <a href="https://github.com/JamesWHagan/rosary">Open source</a>
+    </footer>
   </main>
   <script src="js/samples.js"></script>
   <script src="js/intentions.js"></script>
