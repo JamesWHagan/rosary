@@ -521,6 +521,15 @@
       if (e.key === "ArrowLeft" && !ui.back.disabled) show(current - 1);
     });
 
+    // Arriving with ?n=1 (for example from the "pray one decade while you wait" invitation).
+    var askN = Number(new URLSearchParams(location.search).get("n"));
+    if (askN >= 1 && askN <= 5 && !new URLSearchParams(location.search).get("for")) {
+      history.replaceState(null, "", location.pathname);
+      state.n = askN;
+      openSetup(true);
+      return;
+    }
+
     // Arriving from "Pray for them" on the home page: those people come first.
     var forIds = (new URLSearchParams(location.search).get("for") || "").split(",").filter(Intentions.byId);
     if (forIds.length) {

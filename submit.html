@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Share your intention — Decade4U</title>
+  <meta name="description" content="Share a prayer intention, and someone will pray a decade of the rosary for you.">
+  <meta name="robots" content="noindex">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div class="test-banner" role="note">Test version: intentions are not sent or saved yet.</div>
+
+  <!-- ---------- the form ---------- -->
+  <form class="share" id="form" novalidate>
+    <a class="link back-home" href="./">← Home</a>
+    <h2>Share your intention</h2>
+    <p class="lead">Someone will pray one decade of the rosary for you.</p>
+
+    <div class="field">
+      <label class="label" for="intention">Your intention</label>
+      <textarea id="intention" maxlength="300" rows="4"
+        placeholder="For example: For my mother's recovery after her operation."></textarea>
+      <div class="field-foot">
+        <span class="fine">Please use first names only. Leave out surnames, addresses, phone numbers and anything that could identify someone.</span>
+        <span class="count" id="intention-count">0 / 300</span>
+      </div>
+      <p class="field-error" id="intention-error" hidden></p>
+    </div>
+
+    <div class="field">
+      <div class="label">How should we show your name?</div>
+      <div class="name-modes" id="name-modes">
+        <button type="button" data-mode="anon" aria-pressed="true">Anonymous</button>
+        <button type="button" data-mode="first" aria-pressed="false">First name</button>
+        <button type="button" data-mode="label" aria-pressed="false">A description</button>
+      </div>
+      <input id="first-name" type="text" maxlength="30" autocomplete="given-name" placeholder="Your first name" hidden>
+      <div class="labels" id="labels" hidden>
+        <button type="button">A mother</button>
+        <button type="button">A father</button>
+        <button type="button">A student</button>
+        <button type="button">A family</button>
+        <button type="button">A grandparent</button>
+        <button type="button">A friend</button>
+      </div>
+      <p class="fine" id="name-preview">People praying will see: <strong>Someone</strong></p>
+    </div>
+
+    <div class="field">
+      <label class="label" for="thanks">A thank-you for the person who prays <span class="opt">(optional)</span></label>
+      <textarea id="thanks" maxlength="200" rows="2"
+        placeholder="Thank you for praying for me. May God bless you."></textarea>
+      <div class="field-foot">
+        <span class="fine">They'll see this after their decade. If you leave it empty, we'll use the words above.</span>
+        <span class="count" id="thanks-count">0 / 200</span>
+      </div>
+    </div>
+
+    <!-- shown when an intention mentions suicide or self-harm -->
+    <aside class="care" id="care" hidden>
+      <h3>You are not alone</h3>
+      <p>It sounds like you may be carrying something very heavy. Your intention matters, and so do you. Please reach out to someone today, too.</p>
+      <ul>
+        <li>If you are in danger right now, call <strong>112</strong> (emergency number in Italy and across Europe) or your local emergency number.</li>
+        <li><a href="https://findahelpline.com" target="_blank" rel="noopener">findahelpline.com</a> lists free, confidential helplines in your country, by phone, text or chat.</li>
+        <li>Talking to a priest, a friend or a family member you trust can help too.</li>
+      </ul>
+      <p class="fine">You can still share your intention below.</p>
+    </aside>
+
+    <p class="review-note">Every intention is read by a person before anyone prays for it, to keep this a safe and respectful place.</p>
+    <button class="btn primary" id="send" type="submit">Share my intention</button>
+  </form>
+
+  <!-- ---------- after sharing ---------- -->
+  <section class="sent" id="sent" hidden>
+    <div class="beads-row" aria-hidden="true">
+      <span></span><span></span><span></span><span></span><span></span>
+      <span></span><span></span><span></span><span></span><span></span>
+    </div>
+    <h2 tabindex="-1">Thank you</h2>
+    <p>Your intention has been received. Once it has been read, people will begin praying a decade for you.</p>
+    <blockquote class="sent-intention" id="sent-intention"></blockquote>
+    <div class="invite">
+      <p class="invite-q">Would you like to pray one decade for someone while you wait?</p>
+      <a class="btn primary" href="pray.html?n=1">Pray one decade for someone</a>
+      <a class="btn" href="./">Not now</a>
+    </div>
+    <p class="fine test-note">(Test version: this intention was kept on this device only and not sent.)</p>
+  </section>
+
+  <script src="js/submit.js"></script>
+</body>
+</html>
