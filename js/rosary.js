@@ -496,8 +496,13 @@
     ui.ring.addEventListener("click", tapNext);
 
     // Swipe left = next, swipe right = back (both modes).
-    var sx = null, sy = 0;
-    ui.main.addEventListener("pointerdown", function (e) { sx = e.clientX; sy = e.clientY; });
+    // Swipe up = show the prayers, swipe down = hide them.
+    // A vertical swipe that starts on the prayer text scrolls the text instead.
+    var sx = null, sy = 0, onText = false;
+    ui.main.addEventListener("pointerdown", function (e) {
+      sx = e.clientX; sy = e.clientY;
+      onText = !!(e.target.closest && e.target.closest(".card"));
+    });
     ui.main.addEventListener("pointercancel", function () { sx = null; });
     ui.main.addEventListener("pointerup", function (e) {
       if (sx === null) return;
@@ -506,6 +511,10 @@
       if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy) * 1.5) {
         justSwiped = Date.now();
         if (dx < 0) next(); else if (current > 0) show(current - 1);
+      } else if (!onText && Math.abs(dy) > 70 && Math.abs(dy) > Math.abs(dx) * 1.5) {
+        justSwiped = Date.now();
+        var hide = dy > 0;            // finger moved down = hide, up = show
+        if (hide !== state.hide) { state.hide = hide; applyHide(); }
       }
     });
 
