@@ -422,3 +422,74 @@ body {
       inset 0 0 16px color-mix(in srgb, var(--glow) 8%, transparent);
   }
 }
+
+/* =====================================================================
+   Desktop and laptop layout (wide screens). Phones keep the layout above.
+   ===================================================================== */
+@media (min-width: 900px) {
+  /* ---- home: title + counter on the left, people who need prayers on the right ---- */
+  .home main {
+    max-width: 1100px; min-height: 100vh; text-align: left;
+    display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); column-gap: 64px;
+    grid-template-areas: "hero need" "stat need" "stat actions" "foot foot";
+    grid-template-rows: auto auto 1fr auto; align-content: center;
+    padding: 56px 40px 32px;
+  }
+  .hero { grid-area: hero; align-self: end; }
+  .hero .beads-row { margin-left: 0; }
+  .hero .intro { margin: 0; max-width: 420px; }
+  .home .need, .all-prayed { grid-area: need; align-self: center; margin-top: 0; }
+  .home #home-stat { grid-area: stat; align-self: start; }
+  .home #home-stat .stat { align-items: flex-start; margin-left: 0; }
+  .home .actions { grid-area: actions; align-self: start; }
+  .foot { grid-area: foot; text-align: center; }
+
+  /* ---- setup: choices left, the people you'll pray for right ---- */
+  .setup {
+    max-width: 1040px; padding: 32px 40px 40px;
+    display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); column-gap: 56px; row-gap: 20px;
+    grid-template-areas: "back back" "title title" "lead lead" "dec pray" "modes pray" "modes start";
+    grid-template-rows: auto auto auto auto auto 1fr;
+  }
+  .setup > :nth-child(1) { grid-area: back; }
+  .setup > :nth-child(2) { grid-area: title; }
+  .setup > :nth-child(3) { grid-area: lead; }
+  .setup > :nth-child(4) { grid-area: dec; }
+  .setup > :nth-child(5) { grid-area: modes; }
+  .setup > :nth-child(6) { grid-area: pray; }
+  .setup > :nth-child(7) { grid-area: start; align-self: start; }
+  .setup .start { position: static; box-shadow: none; }
+
+  /* ---- prayer screen: big rosary left, mystery/intention/prayer right ---- */
+  .pray {
+    max-width: 1240px; padding: 16px 40px 24px;
+    display: grid; column-gap: 48px;
+    grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+    grid-template-areas: "top top" "where where" "prog prog" "ring strip" "ring card" "ring hint" "ring controls";
+    grid-template-rows: auto auto auto auto 1fr auto auto;
+  }
+  .pray .topbar { grid-area: top; }
+  .pray .where { grid-area: where; }
+  .pray .progress { grid-area: prog; margin-bottom: 12px; }
+  .pray .rosary-wrap { grid-area: ring; min-height: 0; padding: 0; align-items: center; }
+  .pray #rosary { width: 100%; height: 100%; max-height: none; }
+  .pray .strip { grid-area: strip; margin: 0 0 12px; }
+  .pray .strip.on-mystery { display: none; }
+  .pray .card { grid-area: card; margin: 0 0 12px; }
+  .pray .gesture-hint { grid-area: hint; }
+  .pray .controls { grid-area: controls; }
+  .strip-int { -webkit-line-clamp: 3; }
+  .card .text p { font-size: 1.18rem; }
+
+  /* prayers hidden: the rosary takes the left, the decade panel sits beside it */
+  .pray.hide-prayers {
+    grid-template-areas: "top top" "where where" "prog prog" "ring strip" "ring hint";
+    grid-template-rows: auto auto auto 1fr auto;
+  }
+  .pray.hide-prayers .strip, .pray.hide-prayers .strip.on-mystery { align-self: center; margin: 0; }
+  .pray.hide-prayers .strip-myst { font-size: 1.6rem; }
+  .pray.hide-prayers .strip-int { font-size: 1.1rem; -webkit-line-clamp: 4; }
+
+  /* ---- Amen screen: thank-you messages in a grid ---- */
+  .done .thanks { max-width: 980px; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); }
+}

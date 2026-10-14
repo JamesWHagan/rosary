@@ -364,7 +364,10 @@
   var HINT_KEY = "decade4u.gestureHintSeen", moves = 0;
   function updateHint() {
     var seen = storeGet(HINT_KEY) === "1";
-    ui.hint.textContent = state.mode === "own" ? T.ui.hintOwn : T.ui.hintBeads;
+    var mouse = window.matchMedia && window.matchMedia("(hover: hover) and (pointer: fine)").matches;
+    ui.hint.textContent = state.mode === "own"
+      ? (mouse ? T.ui.hintOwnDesktop : T.ui.hintOwn)
+      : (mouse ? T.ui.hintBeadsDesktop : T.ui.hintBeads);
     ui.hint.hidden = !state.hide || seen;
   }
   function countMove() {

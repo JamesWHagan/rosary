@@ -146,6 +146,8 @@ window.ROSARY_TEXT = {
     hidePrayersBtn: "Hide prayers",
     hintBeads: "Tap the rosary or swipe left for the next bead · swipe right to go back",
     hintOwn: "Swipe left for the next decade · swipe right to go back",
+    hintBeadsDesktop: "Click the rosary or press → (or Space) for the next bead · ← to go back",
+    hintOwnDesktop: "Press → for the next decade · ← to go back",
     showPrayersBtn: "Show prayers",
     mysteryShort: "{ordinal} {set} Mystery",
     decadeList: "Our Father · Hail Mary × 10 · Glory Be · Fatima Prayer",
