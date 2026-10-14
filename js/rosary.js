@@ -292,12 +292,7 @@
     else ui.where.textContent = fill(T.ui.decade, { n: step.d + 1, total: state.n }) + " · " + fill(T.ui.mysteriesToday, { set: set.name });
 
     // small "for Maria" line on every prayer inside a decade
-    if (step.part === "decade" && !step.mystery) {
-      ui.forLine.textContent = fill(T.ui.forShort, { name: who(its[step.d]) });
-      ui.forLine.hidden = false;
-    } else {
-      ui.forLine.hidden = true;
-    }
+    ui.forLine.hidden = true; // the decade panel now shows who it's for
 
     ui.text.innerHTML = "";
     ui.card.classList.toggle("is-mystery", !!step.mystery);
@@ -353,16 +348,18 @@
     centre.count.textContent = c;
     centre.sub.textContent = sub;
 
-    // the intention strip under the rosary
+    // the decade panel under the rosary: the mystery and the intention, on every bead of the decade
     if (step.part === "decade") {
       var it = its[step.d];
-      ui.stripWho.textContent = fill(T.ui.forShort, { name: who(it) });
+      ui.stripMyst.textContent = set.list[step.d];
+      ui.stripWho.textContent = fill(T.ui.forShort, { name: who(it) }) + ":";
       ui.stripWhat.textContent = it.intention;
       ui.strip.classList.remove("empty");
+      ui.strip.classList.toggle("on-mystery", !!step.mystery);
     } else {
-      ui.stripWho.textContent = "";
-      ui.stripWhat.textContent = "";
+      ui.stripMyst.textContent = ui.stripWho.textContent = ui.stripWhat.textContent = "";
       ui.strip.classList.add("empty");
+      ui.strip.classList.remove("on-mystery");
     }
   }
 
@@ -453,7 +450,7 @@
       kicker: $("kicker"), title: $("prayer-title"), text: $("prayer-text"),
       bar: $("bar"), back: $("back"), next: $("next"), toast: $("toast"),
       doneLead: $("done-lead"), thanks: $("thanks"),
-      hide: $("hide"), ring: $("ring"), hint: $("gesture-hint"), strip: $("strip"), stripWho: $("strip-who"), stripWhat: $("strip-what")
+      hide: $("hide"), ring: $("ring"), hint: $("gesture-hint"), stripMyst: $("strip-myst"), strip: $("strip"), stripWho: $("strip-who"), stripWhat: $("strip-what")
     };
     draw($("rosary"));
 
