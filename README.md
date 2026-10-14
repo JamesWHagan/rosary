@@ -2,7 +2,7 @@
 
 A free website where people share prayer intentions and pray the rosary for each other: **one decade for one person's intention**.
 
-> Status: early development. Live at [decade4u.com](https://decade4u.com), praying with sample intentions while the database is being built.
+> Status: early development. Live at [decade4u.com](https://decade4u.com).
 
 ## How it works
 
@@ -20,10 +20,11 @@ A free website where people share prayer intentions and pray the rosary for each
 ## Technology
 
 - Plain HTML, CSS and JavaScript, with no build step
-- [Supabase](https://supabase.com) for the database (coming soon)
+- Cloudflare Pages Functions (`/functions/api`) for the small server, with a [Cloudflare D1](https://developers.cloudflare.com/d1/) database (`db/schema.sql`)
+- Cloudflare Workers AI checks new intentions; anything unsure waits for a person on the admin page (`admin.html`, protected by the `ADMIN_PASSWORD` secret)
 - Hosted on [Cloudflare Pages](https://pages.cloudflare.com) (free, unlimited visitors), which redeploys automatically on every push to `main`
 
-To run it locally, open `index.html` in a browser.
+To try the pages without a server, open `index.html` in a browser (sample intentions are used). To run the full site with a local database, use `npx wrangler pages dev .` after creating the tables from `db/schema.sql`.
 
 ## Contributing
 

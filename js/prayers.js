@@ -141,6 +141,9 @@ window.ROSARY_TEXT = {
     resumed: "Continuing where you left off.",
     restartConfirm: "Stop and go back to the start? Your progress will be lost.",
     anonymous: "Someone",
+    general: "a general intention",
+    generalShort: "General intention",
+    loading: "Finding people to pray for…",
     statOne: "person you have prayed for",
     statMany: "people you have prayed for",
     hidePrayersBtn: "Hide prayers",
@@ -166,6 +169,12 @@ window.ROSARY_TEXT = {
     modeOwnShort: "With my own rosary",
     showPrayers: "Show the prayers",
     ownHint: "Pray these on your own rosary, then press Next.",
-    ownDecadeHint: "Pray this decade on your own rosary, then press Next."
+    ownDecadeHint: "Pray this decade on your own rosary, then press Next.",
+    report: "Report",
+    reportAsk: "Hide this intention and send it for review?",
+    reportYes: "Yes, hide it",
+    reportNo: "Cancel",
+    reportDone: "Thank you. It's hidden and will be reviewed.",
+    reportFail: "Couldn't send the report. Please try again."
   }
 };

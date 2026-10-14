@@ -1,0 +1,15 @@
+# Cloudflare Pages settings for Decade4U.
+# This file tells Cloudflare which database and AI the server code (in /functions) can use.
+name = "decade4u"
+pages_build_output_dir = "."
+compatibility_date = "2026-10-01"
+
+# The intentions database (Cloudflare D1, stored in the EU)
+[[d1_databases]]
+binding = "DB"
+database_name = "decade4u"
+database_id = "c22b13c0-1737-421b-9d38-f7e8cef83ffd"
+
+# Cloudflare Workers AI, used to check new intentions
+[ai]
+binding = "AI"

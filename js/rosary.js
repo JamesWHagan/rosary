@@ -165,19 +165,32 @@
   }
 
   // ---------- Intentions (see js/intentions.js) ----------
-  // state.order is a list of intention ids, least prayed for first.
-  function freshOrder() { return Intentions.queue().map(function (it) { return it.id; }); }
-  function who(it) { return Intentions.isAnonymous(it) ? T.ui.anonymous : it.name; }
+  // state.list holds up to 5 intentions (fetched from the server), one per decade.
+  function who(it) {
+    if (it.general) return T.ui.general;
+    return Intentions.isAnonymous(it) ? T.ui.anonymous : it.name;
+  }
 
   // ---------- State ----------
   var setKey = todaysSet();
   var set = T.mysteries[setKey];
-  var state = { mode: "beads", n: 5, order: freshOrder(), hide: false, done: [] };
+  var state = { mode: "beads", n: 5, list: [], forIds: [], hide: false, done: [] };
   var steps = [];
   var current = 0;
 
-  function assigned() {
-    return state.order.map(Intentions.byId).filter(Boolean).slice(0, state.n);
+  function assigned() { return state.list.slice(0, state.n); }
+
+  // Ask the server for intentions (5, so changing the number of decades needs no new request).
+  var loading = 0;
+  function loadList() {
+    var mine = ++loading;
+    state.list = [];
+    renderSetup();
+    return Intentions.assign(5, state.forIds).then(function (list) {
+      if (mine !== loading) return;
+      state.list = list;
+      renderSetup();
+    });
   }
 
   var $ = function (id) { return document.getElementById(id); };
@@ -189,7 +202,7 @@
   function storeDel(key) { try { localStorage.removeItem(key); } catch (e) {} }
 
   function save() {
-    storeSet(STORE_KEY, JSON.stringify({ step: current, set: setKey, mode: state.mode, n: state.n, order: state.order, done: state.done, at: Date.now() }));
+    storeSet(STORE_KEY, JSON.stringify({ step: current, set: setKey, mode: state.mode, n: state.n, list: state.list, done: state.done, at: Date.now() }));
   }
   function loadSaved() {
     try {
@@ -209,6 +222,13 @@
     });
     ui.setupNote.textContent = state.n === 5 ? T.ui.fullNote : T.ui.shortNote;
     ui.assigned.innerHTML = "";
+    ui.start.disabled = !state.list.length;
+    if (!state.list.length) {
+      var wait = document.createElement("li");
+      wait.className = "loading";
+      wait.textContent = T.ui.loading;
+      ui.assigned.appendChild(wait);
+    }
     assigned().forEach(function (it, d) {
       var li = document.createElement("li");
       var top = document.createElement("div");
@@ -217,9 +237,55 @@
       var p = document.createElement("p");
       p.textContent = it.intention;
       li.appendChild(top); li.appendChild(p);
+      if (!it.general) addReport(li, it, function () {
+        // a reported intention is hidden on the server; fetch a replacement
+        state.forIds = state.forIds.filter(function (id) { return id !== it.id; });
+        loadList();
+      });
       ui.assigned.appendChild(li);
     });
     ui.start.textContent = fill(state.n === 1 ? T.ui.startOne : T.ui.startMany, { n: state.n });
+  }
+
+  // ---------- Report an intention ----------
+  // A small "Report" link. Asking twice (Report → "Yes, hide it") prevents accidental taps.
+  // The intention is hidden for everyone at once and goes to the maintainer's admin page.
+  function addReport(li, it, after) {
+    var row = document.createElement("div");
+    row.className = "report-row";
+    var btn = document.createElement("button");
+    btn.type = "button"; btn.className = "report-link"; btn.textContent = T.ui.report;
+    row.appendChild(btn);
+    btn.addEventListener("click", function () {
+      row.innerHTML = "";
+      var q = document.createElement("span"); q.textContent = T.ui.reportAsk;
+      var yes = document.createElement("button"); yes.type = "button"; yes.className = "report-link strong"; yes.textContent = T.ui.reportYes;
+      var no = document.createElement("button"); no.type = "button"; no.className = "report-link"; no.textContent = T.ui.reportNo;
+      row.appendChild(q); row.appendChild(yes); row.appendChild(no);
+      no.addEventListener("click", function () { row.innerHTML = ""; row.appendChild(btn); });
+      yes.addEventListener("click", function () {
+        yes.disabled = true;
+        Intentions.report(it.id).then(function (r) {
+          row.innerHTML = "";
+          var done = document.createElement("span");
+          done.textContent = (r && r.ok) ? T.ui.reportDone : ((r && r.error) || T.ui.reportFail);
+          row.appendChild(done);
+          if (r && r.ok) {
+            li.classList.add("reported");
+            showToast(T.ui.reportDone);
+            if (after) setTimeout(after, 900);
+          }
+        });
+      });
+    });
+    li.appendChild(row);
+  }
+
+  function showToast(msg) {
+    ui.toast.textContent = msg;
+    ui.toast.hidden = false;
+    clearTimeout(showToast.t);
+    showToast.t = setTimeout(function () { ui.toast.hidden = true; }, 3000);
   }
 
   // ---------- Prayer screens ----------
@@ -452,9 +518,10 @@
     ui.thanks.innerHTML = "";
     assigned().forEach(function (it) {
       var li = document.createElement("li");
-      para(li, who(it), "who");
+      para(li, it.general ? T.ui.generalShort : who(it), "who");
       para(li, it.intention, "what");
-      para(li, "“" + (it.thanks || T.ui.defaultThanks) + "”", "msg");
+      if (!it.general) para(li, "“" + (it.thanks || T.ui.defaultThanks) + "”", "msg");
+      if (!it.general) addReport(li, it);
       ui.thanks.appendChild(li);
     });
     if (window.DecadeStats) {
@@ -475,9 +542,8 @@
   function openSetup(newIntentions) {
     storeDel(STORE_KEY);
     state.done = [];
-    if (newIntentions) state.order = freshOrder();
-    renderSetup();
     screen("setup");
+    if (newIntentions || !state.list.length) loadList(); else renderSetup();
   }
 
   function begin(at) {
@@ -499,6 +565,8 @@
     if (st.endsDecade && state.done.indexOf(st.d) === -1) {
       state.done.push(st.d);
       if (window.DecadeStats) window.DecadeStats.addDecade();
+      var it = assigned()[st.d];
+      if (it) Intentions.prayed(it.id);
     }
     if (current === steps.length - 1) {
       storeDel(STORE_KEY);
@@ -588,31 +656,22 @@
       if (e.key === "ArrowLeft" && !ui.back.disabled) show(current - 1);
     });
 
-    // Arriving with ?n=1 (for example from the "pray one decade while you wait" invitation).
-    var askN = Number(new URLSearchParams(location.search).get("n"));
-    if (askN >= 1 && askN <= 5 && !new URLSearchParams(location.search).get("for")) {
-      history.replaceState(null, "", location.pathname);
-      state.n = askN;
+    // Arriving with ?n=1 (the "pray one decade while you wait" invitation)
+    // or ?for=id1,id2 ("Pray for them" on the home page).
+    var params = new URLSearchParams(location.search);
+    var askN = Number(params.get("n"));
+    var forIds = (params.get("for") || "").split(",").filter(Boolean).slice(0, 5);
+    if (forIds.length || (askN >= 1 && askN <= 5)) {
+      history.replaceState(null, "", location.pathname); // so a reload doesn't restart it
+      state.forIds = forIds;
+      state.n = forIds.length ? forIds.length : askN;
       openSetup(true);
       return;
     }
 
-    // Arriving from "Pray for them" on the home page: those people come first.
-    var forIds = (new URLSearchParams(location.search).get("for") || "").split(",").filter(Intentions.byId);
-    if (forIds.length) {
-      history.replaceState(null, "", location.pathname); // so a reload doesn't restart it
-      state.order = forIds.concat(freshOrder().filter(function (id) { return forIds.indexOf(id) === -1; }));
-      state.n = Math.min(5, forIds.length);
-      storeDel(STORE_KEY);
-      state.done = [];
-      renderSetup();
-      screen("setup");
-      return;
-    }
-
     var saved = loadSaved();
-    if (saved && (saved.mode === "beads" || saved.mode === "own") && saved.n >= 1 && saved.n <= 5 && saved.order) {
-      state.mode = saved.mode; state.n = saved.n; state.order = saved.order;
+    if (saved && (saved.mode === "beads" || saved.mode === "own") && saved.n >= 1 && saved.n <= 5 && saved.list && saved.list.length) {
+      state.mode = saved.mode; state.n = saved.n; state.list = saved.list;
       state.done = Array.isArray(saved.done) ? saved.done : [];
       begin(Math.min(saved.step, buildSteps(state.mode, state.n).length - 1));
       ui.toast.textContent = T.ui.resumed;
