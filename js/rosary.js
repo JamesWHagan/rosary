@@ -31,6 +31,7 @@
   // Beads are counted clockwise: from the medal up the right-hand side.
   var CX = 150, CY = 138, R = 118, SLOTS = 55;
   var beads = {};
+  var centre = {}, rippleLayer = null;
 
   function el(name, attrs, parent) {
     var node = document.createElementNS(NS, name);
@@ -69,6 +70,31 @@
     el("rect", { x: CX - 2.5, y: 360, width: 5, height: 40, rx: 1.5 }, cross);
     el("rect", { x: CX - 13, y: 370, width: 26, height: 5, rx: 1.5 }, cross);
     beads.cross = cross;
+
+    // label in the middle of the loop, used when the prayers are hidden
+    var fo = el("foreignObject", { x: CX - 80, y: CY - 74, width: 160, height: 148, class: "centre" }, svg);
+    var div = document.createElement("div");
+    div.className = "centre-box";
+    div.innerHTML = '<div class="c-kicker"></div><div class="c-title"></div><div class="c-count"></div><div class="c-sub"></div>';
+    fo.appendChild(div);
+    centre = {
+      kicker: div.querySelector(".c-kicker"), title: div.querySelector(".c-title"),
+      count: div.querySelector(".c-count"), sub: div.querySelector(".c-sub")
+    };
+    rippleLayer = el("g", {}, svg);
+  }
+
+  // a soft ring that spreads out from a bead when you move on to it
+  function ripple(id) {
+    var b = beads[id];
+    if (!b || !b.getBBox || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    var box = b.getBBox();
+    var c = el("circle", { cx: box.x + box.width / 2, cy: box.y + box.height / 2, r: Math.max(box.width, 9) / 2, class: "ripple" }, rippleLayer);
+    setTimeout(function () { c.remove(); }, 700);
+  }
+
+  function buzz(ms) {
+    try { if (navigator.vibrate) navigator.vibrate(ms); } catch (e) {}
   }
 
   // ---------- 2. The order of prayers ----------
@@ -151,7 +177,7 @@
   // ---------- State ----------
   var setKey = todaysSet();
   var set = T.mysteries[setKey];
-  var state = { mode: "beads", n: 5, order: shuffledIndexes() };
+  var state = { mode: "beads", n: 5, order: shuffledIndexes(), hide: false };
   var steps = [];
   var current = 0;
 
@@ -248,6 +274,7 @@
   }
 
   function show(i) {
+    var forward = i === current + 1;
     current = Math.max(0, Math.min(steps.length - 1, i));
     var step = steps[current];
     var its = assigned();
@@ -293,10 +320,60 @@
     }
     ui.card.scrollTop = 0;
 
+    renderCentre(step, its);
+    if (forward) {
+      ripple(step.beads[step.beads.length - 1]);
+      if (state.mode === "beads") buzz(step.endsDecade || step.mystery ? 30 : 8);
+    }
+
     ui.bar.style.width = ((current / (steps.length - 1)) * 100).toFixed(1) + "%";
     ui.back.disabled = current === 0;
     ui.next.textContent = current === steps.length - 1 ? T.ui.finish : T.ui.next;
     save();
+  }
+
+  // What the middle of the rosary says when the prayers are hidden
+  function renderCentre(step, its) {
+    var k = "", t = "", c = "", sub = "";
+    if (step.mystery) {
+      k = fill(T.ui.mysteryShort, { ordinal: T.ordinals[step.d], set: set.name });
+      t = set.list[step.d];
+      if (step.group) sub = T.ui.decadeList;
+    } else if (step.group) {
+      t = step.part === "opening" ? T.ui.opening : T.ui.closing;
+      sub = step.items.map(function (it) { return T.prayers[it[0]].title + (it[1] > 1 ? " × " + it[1] : ""); }).join(" · ");
+    } else {
+      k = step.note || "";
+      t = T.prayers[step.id].title;
+      c = step.count ? step.count[0] + " / " + step.count[1] : "";
+    }
+    centre.kicker.textContent = k;
+    centre.title.textContent = t;
+    centre.count.textContent = c;
+    centre.sub.textContent = sub;
+
+    // the intention strip under the rosary
+    if (step.part === "decade") {
+      var it = its[step.d];
+      ui.stripWho.textContent = fill(T.ui.forShort, { name: who(it) });
+      ui.stripWhat.textContent = it.intention;
+      ui.strip.classList.remove("empty");
+    } else {
+      ui.stripWho.textContent = "";
+      ui.stripWhat.textContent = "";
+      ui.strip.classList.add("empty");
+    }
+  }
+
+  function applyHide() {
+    ui.main.classList.toggle("hide-prayers", state.hide);
+    ui.hide.textContent = state.hide ? T.ui.showPrayersBtn : T.ui.hidePrayersBtn;
+    ui.hide.setAttribute("aria-pressed", String(state.hide));
+    savePrefs();
+  }
+
+  function savePrefs() {
+    storeSet(PREFS_KEY, JSON.stringify({ mode: state.mode, n: state.n, hide: state.hide }));
   }
 
   // ---------- Finish screen ----------
@@ -329,9 +406,14 @@
   }
 
   function begin(at) {
-    storeSet(PREFS_KEY, JSON.stringify({ mode: state.mode, n: state.n }));
     steps = buildSteps(state.mode, state.n);
+    savePrefs();
+    var used = {};
+    steps.forEach(function (st) { st.beads.forEach(function (b) { used[b] = true; }); });
+    for (var id in beads) beads[id].classList.toggle("unused", !used[id]);
     ui.card.classList.toggle("tap-next", state.mode === "beads");
+    ui.ring.classList.toggle("tap-next", state.mode === "beads");
+    applyHide();
     screen("pray");
     show(at || 0);
   }
@@ -355,7 +437,8 @@
       where: $("where"), card: $("card"), forLine: $("for-line"),
       kicker: $("kicker"), title: $("prayer-title"), text: $("prayer-text"),
       bar: $("bar"), back: $("back"), next: $("next"), toast: $("toast"),
-      doneLead: $("done-lead"), thanks: $("thanks")
+      doneLead: $("done-lead"), thanks: $("thanks"),
+      hide: $("hide"), ring: $("ring"), strip: $("strip"), stripWho: $("strip-who"), stripWhat: $("strip-what")
     };
     draw($("rosary"));
 
@@ -363,6 +446,7 @@
       var prefs = JSON.parse(storeGet(PREFS_KEY) || "null");
       if (prefs && (prefs.mode === "beads" || prefs.mode === "own")) state.mode = prefs.mode;
       if (prefs && prefs.n >= 1 && prefs.n <= 5) state.n = prefs.n;
+      if (prefs && typeof prefs.hide === "boolean") state.hide = prefs.hide;
     } catch (e) {}
 
     ui.decades.addEventListener("click", function (e) {
@@ -377,11 +461,31 @@
 
     ui.next.addEventListener("click", next);
     ui.back.addEventListener("click", function () { show(current - 1); });
-    ui.card.addEventListener("click", function (e) {
-      if (state.mode !== "beads") return;
+    // Tapping the prayer card or the rosary moves on one bead (bead-by-bead mode only,
+    // so a stray tap never skips a whole decade).
+    var justSwiped = 0;
+    function tapNext() {
+      if (state.mode !== "beads" || Date.now() - justSwiped < 400) return;
       if (window.getSelection && String(window.getSelection())) return;
       next();
+    }
+    ui.card.addEventListener("click", tapNext);
+    ui.ring.addEventListener("click", tapNext);
+
+    // Swipe left = next, swipe right = back (both modes).
+    var sx = null, sy = 0;
+    ui.main.addEventListener("pointerdown", function (e) { sx = e.clientX; sy = e.clientY; });
+    ui.main.addEventListener("pointerup", function (e) {
+      if (sx === null) return;
+      var dx = e.clientX - sx, dy = e.clientY - sy;
+      sx = null;
+      if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy) * 1.5) {
+        justSwiped = Date.now();
+        if (dx < 0) next(); else if (current > 0) show(current - 1);
+      }
     });
+
+    ui.hide.addEventListener("click", function () { state.hide = !state.hide; applyHide(); });
     $("restart").addEventListener("click", function () {
       if (current === 0 || window.confirm(T.ui.restartConfirm)) openSetup(false);
     });
@@ -389,7 +493,7 @@
 
     document.addEventListener("keydown", function (e) {
       if (ui.main.hidden) return;
-      if (e.key === "ArrowRight") next();
+      if (e.key === "ArrowRight" || (e.key === " " && e.target === document.body)) { e.preventDefault(); next(); }
       if (e.key === "ArrowLeft" && !ui.back.disabled) show(current - 1);
     });
 

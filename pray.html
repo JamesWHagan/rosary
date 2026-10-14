@@ -54,13 +54,19 @@
   <div class="pray" id="prayer" hidden>
     <div class="topbar">
       <a class="link" href="./">← Home</a>
+      <button class="pill" id="hide" type="button" aria-pressed="false">Hide prayers</button>
       <button class="link" id="restart" type="button">Start over</button>
     </div>
     <div class="where" id="where"></div>
     <div class="progress" aria-hidden="true"><div id="bar"></div></div>
 
-    <div class="rosary-wrap">
+    <div class="rosary-wrap" id="ring">
       <svg id="rosary" viewBox="0 0 300 405" aria-hidden="true"></svg>
+    </div>
+
+    <div class="strip empty" id="strip" aria-live="polite">
+      <div class="strip-who" id="strip-who"></div>
+      <div class="strip-what" id="strip-what"></div>
     </div>
 
     <section class="card" id="card" aria-live="polite">
