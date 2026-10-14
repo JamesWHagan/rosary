@@ -11,7 +11,7 @@ async function sha(text) {
 
 export async function onRequest(context) {
   const { request, env } = context;
-  const secret = env.ADMIN_PASSWORD;
+  const secret = String(env.ADMIN_PASSWORD || "").trim(); // ignore spaces copied by accident
   if (!secret || secret.length < 12) return fail("The admin password has not been set up in Cloudflare yet.", 503);
 
   const ip = request.headers.get("cf-connecting-ip") || "unknown";
@@ -21,7 +21,7 @@ export async function onRequest(context) {
   const tries = await env.DB.prepare(`SELECT COUNT(*) AS n FROM admin_attempts WHERE ip = ? AND created_at > ?`).bind(ipKey, hourAgo).first();
   if (tries && tries.n >= 10) return fail("Too many wrong passwords. Please wait an hour and try again.", 429);
 
-  const given = (request.headers.get("authorization") || "").replace(/^Bearer\s+/i, "");
+  const given = (request.headers.get("authorization") || "").replace(/^Bearer\s+/i, "").trim();
   // Compare hashes, so the time taken doesn't reveal how much of the password was right.
   if (!given || (await sha(given)) !== (await sha(secret))) {
     await env.DB.batch([

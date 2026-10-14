@@ -48,7 +48,7 @@
 
   $("login").addEventListener("submit", function (e) {
     e.preventDefault();
-    setPassword($("password").value);
+    setPassword($("password").value.trim());
     load();
   });
   $("signout").addEventListener("click", function () { setPassword(""); $("password").value = ""; showLogin(); });
