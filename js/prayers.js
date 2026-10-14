@@ -142,6 +142,8 @@ window.ROSARY_TEXT = {
     restartConfirm: "Stop and go back to the start? Your progress will be lost.",
     anonymous: "Someone",
     hidePrayersBtn: "Hide prayers",
+    hintBeads: "Tap the rosary or swipe left for the next bead · swipe right to go back",
+    hintOwn: "Swipe left for the next decade · swipe right to go back",
     showPrayersBtn: "Show prayers",
     mysteryShort: "{ordinal} {set} Mystery",
     decadeList: "Our Father · Hail Mary × 10 · Glory Be · Fatima Prayer",

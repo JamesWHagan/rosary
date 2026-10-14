@@ -22,5 +22,5 @@ A record of choices made for Decade4U, so contributors know what was decided and
 ## 2026-10-14
 
 - **Hide prayers:** a switch on the prayer screen hides the prayer texts. The rosary then fills the screen, the current prayer and count show inside the loop, and the intention stays visible in a strip below. The choice is remembered.
-- **Touching the rosary:** in bead-by-bead mode, tapping the rosary or the prayer moves to the next bead, with a soft ripple and a light vibration on phones that support it (stronger at the end of a decade). Swipe left for next and right for back, in both modes.
+- **Touching the rosary:** in bead-by-bead mode, tapping the rosary or the prayer moves to the next bead, with a soft ripple and a light vibration on phones that support it (stronger at the end of a decade). Swipe left for next and right for back, anywhere on the prayer screen, in both modes. While the prayers are hidden, the Back and Next buttons are hidden too, and a one-line hint explains the gestures until the person has moved on a few times.
 - **Partial rosaries:** beads of decades not being prayed are faded.

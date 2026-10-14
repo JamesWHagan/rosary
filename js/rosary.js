@@ -322,6 +322,7 @@
 
     renderCentre(step, its);
     if (forward) {
+      countMove();
       ripple(step.beads[step.beads.length - 1]);
       if (state.mode === "beads") buzz(step.endsDecade || step.mystery ? 30 : 8);
     }
@@ -365,8 +366,22 @@
     }
   }
 
+  // A short how-to line shown while the prayers are hidden, until someone has moved on a few times.
+  var HINT_KEY = "decade4u.gestureHintSeen", moves = 0;
+  function updateHint() {
+    var seen = storeGet(HINT_KEY) === "1";
+    ui.hint.textContent = state.mode === "own" ? T.ui.hintOwn : T.ui.hintBeads;
+    ui.hint.hidden = !state.hide || seen;
+  }
+  function countMove() {
+    if (!state.hide || ++moves < 3) return;
+    storeSet(HINT_KEY, "1");
+    ui.hint.hidden = true;
+  }
+
   function applyHide() {
     ui.main.classList.toggle("hide-prayers", state.hide);
+    updateHint();
     ui.hide.textContent = state.hide ? T.ui.showPrayersBtn : T.ui.hidePrayersBtn;
     ui.hide.setAttribute("aria-pressed", String(state.hide));
     savePrefs();
@@ -438,7 +453,7 @@
       kicker: $("kicker"), title: $("prayer-title"), text: $("prayer-text"),
       bar: $("bar"), back: $("back"), next: $("next"), toast: $("toast"),
       doneLead: $("done-lead"), thanks: $("thanks"),
-      hide: $("hide"), ring: $("ring"), strip: $("strip"), stripWho: $("strip-who"), stripWhat: $("strip-what")
+      hide: $("hide"), ring: $("ring"), hint: $("gesture-hint"), strip: $("strip"), stripWho: $("strip-who"), stripWhat: $("strip-what")
     };
     draw($("rosary"));
 
@@ -475,6 +490,7 @@
     // Swipe left = next, swipe right = back (both modes).
     var sx = null, sy = 0;
     ui.main.addEventListener("pointerdown", function (e) { sx = e.clientX; sy = e.clientY; });
+    ui.main.addEventListener("pointercancel", function () { sx = null; });
     ui.main.addEventListener("pointerup", function (e) {
       if (sx === null) return;
       var dx = e.clientX - sx, dy = e.clientY - sy;

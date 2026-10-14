@@ -310,3 +310,13 @@ body {
 .strip-what {
   line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
 }
+
+/* the whole prayer screen listens for sideways swipes; vertical scrolling still works */
+.pray { touch-action: pan-y; user-select: none; -webkit-user-select: none; }
+.pray .card .text { user-select: text; -webkit-user-select: text; }
+.pray.hide-prayers .controls { display: none; }
+.pray.hide-prayers .strip { margin-bottom: 8px; }
+.gesture-hint {
+  text-align: center; color: var(--muted); font-size: .82rem; line-height: 1.4;
+  padding: 0 8px 6px;
+}
