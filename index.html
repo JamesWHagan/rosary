@@ -19,11 +19,20 @@
     <h1 class="serif">Decade4U</h1>
     <p>Share your intention, and pray a decade for someone else's.</p>
     <div id="home-stat" hidden></div>
+    <section class="need" id="need" hidden>
+      <h2 id="need-title"></h2>
+      <ul id="need-list"></ul>
+      <a class="btn primary" id="need-go" href="pray.html"></a>
+    </section>
+    <p class="all-prayed" id="all-prayed" hidden>Everyone has been prayed for. Thank you 🙏</p>
+
     <div class="actions">
-      <a class="btn primary" href="pray.html">Pray for others</a>
+      <a class="btn" id="pray-others" href="pray.html">Pray for others</a>
       <p class="soon">Sharing your own intention is coming soon.</p>
     </div>
   </main>
+  <script src="js/samples.js"></script>
+  <script src="js/intentions.js"></script>
   <script src="js/stats.js"></script>
   <script>
     (function () {
@@ -33,6 +42,45 @@
         host.hidden = false;
         DecadeStats.ring(host, n, n === 1 ? "person you have prayed for" : "people you have prayed for");
       }
+
+      // "Maria, Luca and one more person need your prayers": 3 people nobody has prayed for yet
+      var pick = Intentions.featured(3);
+      if (!pick.length) {
+        document.getElementById("all-prayed").hidden = false;
+        document.getElementById("pray-others").classList.add("primary");
+        return;
+      }
+      // named people first, so the cards follow the same order as the heading
+      pick = pick.filter(function (it) { return !Intentions.isAnonymous(it); })
+                 .concat(pick.filter(function (it) { return Intentions.isAnonymous(it); }));
+      var names = pick.filter(function (it) { return !Intentions.isAnonymous(it); }).map(function (it) { return it.name; });
+      var others = pick.length - names.length;
+      var count = ["", "one", "two", "three"];
+      var parts = names.slice();
+      if (others) {
+        if (!names.length) parts = [pick.length === 1 ? "Someone" : count[others].charAt(0).toUpperCase() + count[others].slice(1) + " people"];
+        else parts.push(others === 1 ? "one more person" : count[others] + " others");
+      }
+      var who = parts.length > 1 ? parts.slice(0, -1).join(", ") + " and " + parts[parts.length - 1] : parts[0];
+      var needs = pick.length === 1 && (names.length === 1 || !names.length) ? " needs" : " need";
+      document.getElementById("need-title").textContent = who + needs + " your prayers";
+
+      var ul = document.getElementById("need-list");
+      pick.forEach(function (it) {
+        var li = document.createElement("li");
+        var b = document.createElement("span");
+        b.className = "nm";
+        b.textContent = Intentions.isAnonymous(it) ? "Someone" : it.name;
+        var t = document.createElement("span");
+        t.className = "tx";
+        t.textContent = it.intention;
+        li.appendChild(b); li.appendChild(t);
+        ul.appendChild(li);
+      });
+      var go = document.getElementById("need-go");
+      go.href = "pray.html?for=" + pick.map(function (it) { return encodeURIComponent(it.id); }).join(",");
+      go.textContent = pick.length === 1 ? "Pray a decade for them" : "Pray for them · " + pick.length + " decades";
+      document.getElementById("need").hidden = false;
     })();
   </script>
 </body>

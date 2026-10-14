@@ -350,3 +350,33 @@ body {
 .stat-label { color: var(--muted); font-size: .92rem; letter-spacing: .02em; }
 @media (prefers-reduced-motion: reduce) { .stat-ring .spin { animation: none; } }
 .done #done-stat .stat { margin-top: 8px; }
+
+/* ---------- "need your prayers" on the home page ---------- */
+.need {
+  margin: 26px 0 4px; padding: 18px 16px 16px; text-align: left;
+  background: var(--surface); border: 1px solid var(--line); border-radius: 20px;
+  box-shadow: 0 1px 0 color-mix(in srgb, var(--glow) 35%, transparent) inset;
+}
+.need h2 {
+  font-family: "Cormorant Garamond", Georgia, serif; font-weight: 600; font-size: 1.45rem; line-height: 1.2;
+  text-align: center; margin-bottom: 12px;
+}
+.need ul { list-style: none; display: grid; gap: 8px; margin-bottom: 14px; }
+.need li {
+  display: grid; gap: 1px; padding: 9px 12px 9px 30px; position: relative;
+  background: color-mix(in srgb, var(--glow) 9%, transparent); border-radius: 12px;
+}
+.need li::before {
+  content: ""; position: absolute; left: 12px; top: 15px; width: 9px; height: 9px; border-radius: 50%;
+  background: var(--glow); box-shadow: 0 0 8px color-mix(in srgb, var(--glow) 70%, transparent);
+  animation: breathe 2.8s ease-in-out infinite;
+}
+.need li:nth-child(2)::before { animation-delay: .9s; }
+.need li:nth-child(3)::before { animation-delay: 1.8s; }
+@keyframes breathe { 0%, 100% { opacity: .45; } 50% { opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .need li::before { animation: none; } }
+.need .nm { font-size: .8rem; color: var(--muted); }
+.need .tx { line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.need .btn { width: 100%; }
+.all-prayed { margin-top: 22px; color: var(--muted); }
+.home .actions { margin-top: 16px; }

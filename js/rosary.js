@@ -21,9 +21,8 @@
   "use strict";
 
   var T = window.ROSARY_TEXT;
-  var SAMPLES = window.SAMPLE_INTENTIONS || [];
   var NS = "http://www.w3.org/2000/svg";
-  var STORE_KEY = "decade4u.progress.v2";
+  var STORE_KEY = "decade4u.progress.v3";
   var PREFS_KEY = "decade4u.prefs";
 
   // ---------- 1. Drawing the rosary ----------
@@ -164,24 +163,21 @@
     return str.replace(/\{(\w+)\}/g, function (_, k) { return vars[k]; });
   }
 
-  // ---------- Intentions (samples for now) ----------
-  function shuffledIndexes() {
-    var a = SAMPLES.map(function (_, i) { return i; });
-    for (var i = a.length - 1; i > 0; i--) {
-      var j = Math.floor(Math.random() * (i + 1)), t = a[i]; a[i] = a[j]; a[j] = t;
-    }
-    return a;
-  }
-  function who(it) { return it.name && it.name !== "Anonymous" ? it.name : T.ui.anonymous; }
+  // ---------- Intentions (see js/intentions.js) ----------
+  // state.order is a list of intention ids, least prayed for first.
+  function freshOrder() { return Intentions.queue().map(function (it) { return it.id; }); }
+  function who(it) { return Intentions.isAnonymous(it) ? T.ui.anonymous : it.name; }
 
   // ---------- State ----------
   var setKey = todaysSet();
   var set = T.mysteries[setKey];
-  var state = { mode: "beads", n: 5, order: shuffledIndexes(), hide: false, done: [] };
+  var state = { mode: "beads", n: 5, order: freshOrder(), hide: false, done: [] };
   var steps = [];
   var current = 0;
 
-  function assigned() { return state.order.slice(0, state.n).map(function (i) { return SAMPLES[i]; }); }
+  function assigned() {
+    return state.order.map(Intentions.byId).filter(Boolean).slice(0, state.n);
+  }
 
   var $ = function (id) { return document.getElementById(id); };
   var ui = {};
@@ -417,7 +413,7 @@
   function openSetup(newIntentions) {
     storeDel(STORE_KEY);
     state.done = [];
-    if (newIntentions) state.order = shuffledIndexes();
+    if (newIntentions) state.order = freshOrder();
     renderSetup();
     screen("setup");
   }
@@ -520,6 +516,19 @@
       if (e.key === "ArrowRight" || (e.key === " " && e.target === document.body)) { e.preventDefault(); next(); }
       if (e.key === "ArrowLeft" && !ui.back.disabled) show(current - 1);
     });
+
+    // Arriving from "Pray for them" on the home page: those people come first.
+    var forIds = (new URLSearchParams(location.search).get("for") || "").split(",").filter(Intentions.byId);
+    if (forIds.length) {
+      history.replaceState(null, "", location.pathname); // so a reload doesn't restart it
+      state.order = forIds.concat(freshOrder().filter(function (id) { return forIds.indexOf(id) === -1; }));
+      state.n = Math.min(5, forIds.length);
+      storeDel(STORE_KEY);
+      state.done = [];
+      renderSetup();
+      screen("setup");
+      return;
+    }
 
     var saved = loadSaved();
     if (saved && (saved.mode === "beads" || saved.mode === "own") && saved.n >= 1 && saved.n <= 5 && saved.order) {
