@@ -14,9 +14,10 @@
   // Seeing one only shows a caring message with places to get help.
   var CRISIS = [
     "suicide", "suicidal", "kill myself", "end my life", "take my own life", "want to die",
-    "don't want to live", "dont want to live", "self harm", "self-harm", "hurt myself", "cut myself", "overdose",
+    "don't want to live", "dont want to live", "do not want to live", "don't want to be alive", "do not want to be alive",
+    "no reason to live", "end it all", "better off dead", "better off without me", "self harm", "self-harm", "hurt myself", "cut myself", "overdose",
     "suicidio", "suicidarmi", "uccidermi", "togliermi la vita", "farla finita", "voglio morire",
-    "non voglio più vivere", "non voglio piu vivere", "farmi del male", "autolesion"
+    "non voglio più vivere", "non voglio piu vivere", "non ce la faccio più a vivere", "meglio morto", "meglio morta", "farmi del male", "autolesion"
   ];
 
   var EMAIL = /[^\s@]+@[^\s@]+\.[a-z]{2,}/i;
