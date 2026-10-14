@@ -112,6 +112,9 @@ window.Intentions = (function () {
   // then general intentions if there aren't enough.
   function assign(n, forIds) {
     var got;
+    // general intentions asked for by id (from the home page) come first, in that order
+    var chosen = (forIds || []).map(function (id) { return GENERAL.find(function (g) { return g.id === id; }); }).filter(Boolean);
+    forIds = (forIds || []).filter(function (id) { return String(id).indexOf("general-") !== 0; });
     if (offline) {
       var s = samples().sort(function (a, b) { return (a.prayed || 0) - (b.prayed || 0); });
       var wanted = (forIds || []).map(function (id) { return s.find(function (x) { return x.id === id; }); }).filter(Boolean);
@@ -122,10 +125,16 @@ window.Intentions = (function () {
         .catch(function () { return []; });
     }
     return got.then(function (list) {
-      var general = shuffle(GENERAL);
-      while (list.length < n) list.push(general[list.length % general.length]);
+      list = chosen.concat(list);
+      var general = shuffle(GENERAL.filter(function (g) { return chosen.indexOf(g) === -1; }));
+      for (var i = 0; list.length < n && i < general.length; i++) list.push(general[i]);
       return list.slice(0, n);
     });
+  }
+
+  // k general intentions at random, for the home page when nobody is waiting
+  function general(k) {
+    return shuffle(GENERAL.slice(1)).slice(0, k); // (the first one, "everyone on Decade4U", reads oddly on its own)
   }
 
   function prayed(id) {
@@ -153,6 +162,6 @@ window.Intentions = (function () {
 
   function isAnonymous(it) { return !it.general && (!it.name || it.name === "Anonymous" || it.name === "Someone"); }
 
-  return { device: device, featured: featured, assign: assign, prayed: prayed, report: report,
+  return { device: device, featured: featured, assign: assign, general: general, prayed: prayed, report: report,
            submit: submit, mine: mine, isAnonymous: isAnonymous, offline: offline };
 })();

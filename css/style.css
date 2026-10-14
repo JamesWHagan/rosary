@@ -613,3 +613,4 @@ html:has(.pray:not([hidden])), body:has(.pray:not([hidden])) { overscroll-behavi
 .mine-actions { display: grid; gap: 8px; text-align: center; }
 .mine-note { text-align: center; margin-top: 8px; }
 .home .my-link { justify-self: center; }
+.need-lead { color: var(--muted); margin: -4px 0 4px; text-align: center; }
