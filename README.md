@@ -2,7 +2,7 @@
 
 A free website where people share prayer intentions and pray the rosary for each other: **one decade for one person's intention**.
 
-> Status: early development. Live at [decade4u.pages.dev](https://decade4u.pages.dev), praying with sample intentions while the database is being built.
+> Status: early development. Live at [decade4u.com](https://decade4u.com), praying with sample intentions while the database is being built.
 
 ## How it works
 
