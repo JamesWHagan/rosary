@@ -12,7 +12,7 @@ A record of choices made for Decade4U, so contributors know what was decided and
   - Closing: **Hail Holy Queen**, then the **closing prayer** ("O God, whose only begotten Son…"), Sign of the Cross
   - Mysteries follow the traditional weekday: Joyful on Monday and Saturday, Sorrowful on Tuesday and Friday, Glorious on Wednesday and Sunday, Luminous on Thursday
 - **Licence:** GNU AGPL-3.0, so every version of the project stays open
-- **Hosting:** Netlify, deploying automatically from the `main` branch
+- **Hosting:** Netlify, deploying automatically from the `main` branch (moved to Cloudflare Pages on 2026-10-14, see below)
 - **Look:** calm and warm. White beads with a soft yellow glow on the active bead, a serif heading font (Cormorant Garamond), and a light or dark theme that follows the phone's own setting
 - **Bead direction:** beads are counted clockwise, going up the right-hand side from the medal
 - **Two ways to pray:** "Bead by bead" (every prayer on screen, 80 steps; tap the card or Next) and "With my own rosary" (one screen per decade, 7 steps) for people praying on a physical rosary
@@ -33,3 +33,4 @@ A record of choices made for Decade4U, so contributors know what was decided and
 - **"… need your prayers" on the home page:** each time the home page opens it features up to 3 people whose intentions nobody has prayed for yet, chosen at random and avoiding the three shown last time. Anonymous ones read naturally ("Maria, Luca and one more person need your prayers"). "Pray for them" starts a rosary with exactly those people, one decade each. If nobody is waiting, it says "Everyone has been prayed for. Thank you 🙏".
 - **js/intentions.js** is the single place the site gets intentions from (sample list for now), so connecting the database in Phase 4 only changes that file. Intentions are handed out least-prayed-first.
 - **Home page = the first thing everyone sees.** Order from the top: the Decade4U title with the tagline "One decade. One person. One prayer." and a short explanation; the "… need your prayers" card as the main action; the golden "people you have prayed for" ring; then "Choose how many decades"; and a small "Free forever · Open source" footer. A soft golden glow sits behind the title. The page scrolls normally, so the title is never cut off on small screens.
+- **Hosting moved to Cloudflare Pages** at decade4u.pages.dev. Netlify's free plan charges credits per deploy and per visitor and pauses the site when they run out; Cloudflare Pages is free with unlimited visitors and 500 deploys a month. Rule for costs: only free plans that pause rather than bill, no card on pay-as-you-go plans, and a spending cap before any upgrade.

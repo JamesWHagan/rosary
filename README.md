@@ -2,7 +2,7 @@
 
 A free website where people share prayer intentions and pray the rosary for each other: **one decade for one person's intention**.
 
-> Status: early development. Live at [rosary-intentions.netlify.app](https://rosary-intentions.netlify.app), currently a "coming soon" page.
+> Status: early development. Live at [decade4u.pages.dev](https://decade4u.pages.dev), praying with sample intentions while the database is being built.
 
 ## How it works
 
@@ -21,7 +21,7 @@ A free website where people share prayer intentions and pray the rosary for each
 
 - Plain HTML, CSS and JavaScript, with no build step
 - [Supabase](https://supabase.com) for the database (coming soon)
-- Hosted on [Netlify](https://www.netlify.com), which redeploys automatically on every push to `main`
+- Hosted on [Cloudflare Pages](https://pages.cloudflare.com) (free, unlimited visitors), which redeploys automatically on every push to `main`
 
 To run it locally, open `index.html` in a browser.
 
