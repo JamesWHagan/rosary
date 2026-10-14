@@ -581,3 +581,35 @@ html:has(.pray:not([hidden])), body:has(.pray:not([hidden])) { overscroll-behavi
 .report-link.strong { color: #c0392b; font-weight: 500; }
 .report-link:disabled { opacity: .5; }
 .assigned li.reported, .thanks li.reported { opacity: .55; }
+
+/* ---------- my intentions ---------- */
+.mine { max-width: 560px; margin: 0 auto; padding: 16px 16px 48px; display: flex; flex-direction: column; gap: 16px; }
+.mine .back-home { align-self: flex-start; }
+.mine h2 { font-family: "Cormorant Garamond", Georgia, serif; font-weight: 600; font-size: 2.1rem; text-align: center; }
+.mine .fine { color: var(--muted); font-size: .88rem; line-height: 1.45; }
+.mine-loading { text-align: center; color: var(--muted); }
+.mine-empty { text-align: center; color: var(--muted); }
+.mine-list { list-style: none; display: grid; gap: 12px; }
+.mine-item {
+  position: relative; background: var(--surface); border-radius: 14px; padding: 14px 16px; display: grid; gap: 6px;
+  border: 1px solid color-mix(in srgb, var(--glow) 45%, var(--line));
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--glow) 12%, transparent), 0 0 18px color-mix(in srgb, var(--glow) 20%, transparent);
+}
+.mine-item.pending { border-color: var(--line); box-shadow: none; }
+.mine-item.complete { opacity: .85; }
+.mine-top { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.mine-tag { font-size: .75rem; border-radius: 999px; padding: 3px 10px; background: color-mix(in srgb, var(--glow) 25%, transparent); }
+.mine-item.pending .mine-tag { background: var(--line); color: var(--text); }
+.mine-item.pending .mine-tag::before { content: "⏳ "; }
+.mine-item.complete .mine-tag::before { content: "✓ "; }
+.mine-date { font-size: .78rem; color: var(--muted); }
+.mine-text { font-size: 1.05rem; line-height: 1.45; overflow-wrap: anywhere; }
+.mine-item.has-count .mine-text { padding-right: 64px; }
+.mine-count { position: absolute; right: 16px; top: 40px; text-align: center; line-height: 1.1; }
+.mine-count strong { display: block; font-family: "Cormorant Garamond", Georgia, serif; font-size: 2rem; color: var(--glow-text); }
+.mine-count span { font-size: .7rem; color: var(--muted); }
+.mine-status { color: var(--muted); font-size: .9rem; }
+.mine-shown { color: var(--muted); font-size: .78rem; }
+.mine-actions { display: grid; gap: 8px; text-align: center; }
+.mine-note { text-align: center; margin-top: 8px; }
+.home .my-link { justify-self: center; }

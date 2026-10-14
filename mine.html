@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>My intentions — Decade4U</title>
+  <meta name="robots" content="noindex">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <main class="mine">
+    <a class="link back-home" href="./">← Home</a>
+    <h2>My intentions</h2>
+
+    <div id="mine-stat" hidden></div>
+    <p class="mine-loading" id="loading">Loading…</p>
+    <ul class="mine-list" id="list"></ul>
+
+    <section class="mine-empty" id="empty" hidden>
+      <p>You haven't shared an intention from this device yet.</p>
+    </section>
+
+    <div class="mine-actions">
+      <a class="btn primary" id="share" href="submit.html">Share an intention</a>
+      <p class="fine" id="limit-note"></p>
+    </div>
+
+    <p class="fine mine-note">Your intentions are linked to this browser, not to an account. If you clear this browser's data or use another device, they won't show here, but people keep praying for them.</p>
+  </main>
+  <script src="js/intentions.js"></script>
+  <script src="js/stats.js"></script>
+  <script src="js/mine.js"></script>
+</body>
+</html>

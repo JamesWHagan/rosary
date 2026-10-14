@@ -34,6 +34,7 @@
     <div class="actions">
       <a class="btn" id="pray-others" href="pray.html">Choose how many decades</a>
       <a class="btn" href="submit.html">Share your own intention</a>
+      <a class="btn" id="my-link" href="mine.html" hidden>My intentions</a>
     </div>
 
     <footer class="foot">
@@ -45,6 +46,9 @@
   <script src="js/stats.js"></script>
   <script>
     (function () {
+      // "My intentions" appears once this browser has shared one
+      try { if (JSON.parse(localStorage.getItem("decade4u.myIntentions.v1") || "[]").length) document.getElementById("my-link").hidden = false; } catch (e) {}
+
       var n = DecadeStats.prayedFor();
       if (n > 0) {           // no sad zero: the ring appears after your first decade
         var host = document.getElementById("home-stat");

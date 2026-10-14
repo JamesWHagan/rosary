@@ -91,7 +91,8 @@
       [s.decades_today || 0, "decades prayed today", false],
       [s.shared_today || 0, "shared today", false],
       [s.approved || 0, "approved in total", false],
-      [s.prayed_total || 0, "decades prayed in total", false]
+      [s.prayed_total || 0, "decades prayed in total", false],
+      [s.completed || 0, "completed (33 decades or 30 days)", false]
     ].forEach(function (c) {
       var d = document.createElement("div");
       if (c[2]) d.className = "warn";

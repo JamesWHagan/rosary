@@ -16,11 +16,39 @@ window.Intentions = (function () {
   var DEVICE_KEY = "decade4u.device";
   var LAST_KEY = "decade4u.featuredLast";
 
+  // Prayed for when there aren't enough people's intentions (common in the first days).
+  // A different random selection each time.
   var GENERAL = [
     "For everyone who has asked for prayer on Decade4U",
+    "For the Holy Father, the Pope, and for the whole Church",
+    "For our bishops and priests, especially those who are tired, lonely or tempted",
+    "For more vocations to the priesthood and religious life",
+    "For the souls in Purgatory, especially those who struggled with pride",
+    "For the souls in Purgatory, especially those who struggled with greed",
+    "For the souls in Purgatory, especially those who struggled with lust",
+    "For the souls in Purgatory, especially those who struggled with envy",
+    "For the souls in Purgatory, especially those who struggled with gluttony",
+    "For the souls in Purgatory, especially those who struggled with anger",
+    "For the souls in Purgatory, especially those who struggled with sloth",
+    "For the souls in Purgatory who have no one to pray for them",
+    "For those who are lukewarm in their faith, that their love for God may be rekindled",
+    "For all who do not yet believe in God, that they may come to know His love",
+    "For those who have left the Church, that they may find their way home",
+    "For an end to the wars in the world, and for everyone suffering because of them",
+    "For refugees and all who have been forced to leave their homes",
+    "For newborn babies and their families",
+    "For mothers who are expecting a child, and for their unborn babies",
+    "For young people struggling with sexual temptation and impurity, that they may find freedom and grace",
+    "For young people searching for meaning, that they may meet Christ",
+    "For married couples and families going through difficult times",
+    "For Christians who are persecuted for their faith",
     "For the sick, the lonely and the dying",
-    "For the souls in Purgatory",
-    "For peace in the world and in our families",
+    "For those who will die today, that they may die in God's grace",
+    "For people fighting addiction, and for their families",
+    "For those in despair, that they may find hope and help",
+    "For the poor and the hungry, and for those who serve them",
+    "For the conversion of sinners, beginning with ourselves",
+    "For peace in our families and in our hearts",
     "For those who have no one to pray for them"
   ].map(function (t, i) { return { id: "general-" + i, general: true, name: "", intention: t, thanks: "", prayed: 0 }; });
 

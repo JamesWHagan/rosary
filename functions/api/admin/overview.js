@@ -1,12 +1,13 @@
 // GET /api/admin/overview - everything the admin page shows:
 // the balance, the queue (waiting for the maintainer), reported intentions,
 // and what the AI approved in the last 2 days (to double-check it).
-import { json } from "../../../lib/server.js";
+import { json, completeDue } from "../../../lib/server.js";
 
 export async function onRequestGet({ env }) {
   const now = Date.now();
   const dayStart = new Date(); dayStart.setUTCHours(0, 0, 0, 0);
   const DB = env.DB;
+  await completeDue(DB);
   const [counts, decadesToday, queue, reported, recent] = await Promise.all([
     DB.prepare(`SELECT
         SUM(status = 'pending') AS pending,
@@ -17,7 +18,8 @@ export async function onRequestGet({ env }) {
         MIN(CASE WHEN status = 'approved' AND prayed = 0 THEN approved_at END) AS oldest_waiting,
         SUM(status = 'approved' AND approved_at >= ?) AS approved_today,
         SUM(created_at >= ?) AS shared_today,
-        SUM(prayed) AS prayed_total
+        SUM(prayed) AS prayed_total,
+        SUM(status = 'retired') AS completed
       FROM intentions`).bind(dayStart.getTime(), dayStart.getTime()).first(),
     DB.prepare(`SELECT COUNT(*) AS n FROM prayers WHERE created_at >= ?`).bind(dayStart.getTime()).first(),
     DB.prepare(`SELECT id, name, intention, thanks, care, moderation, created_at FROM intentions
