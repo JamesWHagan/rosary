@@ -33,10 +33,46 @@
     return new Date(ms).toLocaleDateString(undefined, { day: "numeric", month: "short", year: "numeric" });
   }
 
+  var myList = [];
   fetchMine();
+  function afterLoad() {
+    if (location.hash === "#erase") { openErase(); $("erase").scrollIntoView({ block: "center" }); }
+  }
+
+  // ---------- Erase my data (asks first, says exactly what goes) ----------
+  function openErase() {
+    var ul = $("erase-list");
+    ul.innerHTML = "";
+    var n = myList.length;
+    var items = [];
+    if (n) items.push(plural(n, "your 1 intention (people will no longer pray for it)", "your {n} intentions (people will no longer pray for them)"));
+    if (n) items.push("the count of people who have prayed for you");
+    items.push("the count of people you have prayed for (" + DecadeStats.prayedFor() + ")");
+    items.push("any rosary in progress on this device");
+    items.forEach(function (t) { ul.appendChild(el("li", "", t)); });
+    $("erase-open").hidden = true;
+    $("erase-box").hidden = false;
+  }
+  $("erase-open").addEventListener("click", openErase);
+  $("erase-no").addEventListener("click", function () { $("erase-box").hidden = true; $("erase-open").hidden = false; });
+  $("erase-yes").addEventListener("click", function () {
+    var yes = $("erase-yes");
+    yes.disabled = true; yes.textContent = "Erasing…";
+    Intentions.erase().then(function (r) {
+      if (!r || !r.ok) {
+        yes.disabled = false; yes.textContent = "Yes, erase everything";
+        $("erase-error").textContent = (r && r.error) || "Something went wrong. Please try again.";
+        $("erase-error").hidden = false;
+        return;
+      }
+      ["mine-stat", "list", "empty", "erase-box"].forEach(function (id) { $(id).hidden = true; });
+      document.querySelector(".mine-actions").hidden = true;
+      $("erase-done").hidden = false;
+    });
+  });
 
   function fetchMine() {
-    if (Intentions.offline) { $("loading").hidden = true; $("empty").hidden = false; return; }
+    if (Intentions.offline) { $("loading").hidden = true; $("empty").hidden = false; afterLoad(); return; }
     fetch("/api/intentions?device=" + Intentions.device())
       .then(function (r) { return r.json(); })
       .then(render, function () {
@@ -47,8 +83,9 @@
   function render(r) {
     $("loading").hidden = true;
     var list = (r && r.ok && r.intentions) || [];
+    myList = list;
     var limits = (r && r.limits) || { active: 3, prayers: 33, days: 30 };
-    if (!list.length) { $("empty").hidden = false; return; }
+    if (!list.length) { $("empty").hidden = false; afterLoad(); return; }
 
     var total = list.reduce(function (s, it) { return s + (it.prayed || 0); }, 0);
     if (total > 0) {
@@ -86,5 +123,6 @@
       $("share").textContent = "Share another intention";
       $("limit-note").textContent = "Each intention is prayed for until " + limits.prayers + " people have prayed a decade for it, or for " + limits.days + " days.";
     }
+    afterLoad();
   }
 })();

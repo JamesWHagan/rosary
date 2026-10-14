@@ -614,3 +614,13 @@ html:has(.pray:not([hidden])), body:has(.pray:not([hidden])) { overscroll-behavi
 .mine-note { text-align: center; margin-top: 8px; }
 .home .my-link { justify-self: center; }
 .need-lead { color: var(--muted); margin: -4px 0 4px; text-align: center; }
+
+/* ---------- erase my data ---------- */
+.erase { text-align: center; margin-top: 12px; }
+.erase-box { text-align: left; background: var(--surface); border: 1px solid #c0392b; border-radius: 14px; padding: 16px; display: grid; gap: 10px; }
+.erase-box h3 { font-family: "Cormorant Garamond", Georgia, serif; font-size: 1.5rem; font-weight: 600; }
+.erase-box ul { padding-left: 20px; display: grid; gap: 4px; }
+.erase-box p, .erase-box li { line-height: 1.45; }
+.erase-acts { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.btn.danger { border-color: #c0392b; color: #c0392b; }
+.erase-done { color: var(--muted); line-height: 1.6; }

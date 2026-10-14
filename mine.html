@@ -28,6 +28,22 @@
       <p class="fine" id="limit-note"></p>
     </div>
 
+    <section class="erase" id="erase">
+      <button class="link" id="erase-open" type="button">Erase my data</button>
+      <div class="erase-box" id="erase-box" hidden>
+        <h3>Erase your data?</h3>
+        <p>This permanently removes:</p>
+        <ul id="erase-list"></ul>
+        <p>Decades you have already prayed still count for the people you prayed for. This can't be undone.</p>
+        <div class="erase-acts">
+          <button class="btn danger" id="erase-yes" type="button">Yes, erase everything</button>
+          <button class="btn" id="erase-no" type="button">Cancel</button>
+        </div>
+        <p class="field-error" id="erase-error" hidden></p>
+      </div>
+      <p class="erase-done" id="erase-done" hidden>Your data has been erased. 🙏<br><a class="link" href="./">Back to the home page</a></p>
+    </section>
+
     <p class="fine mine-note">Your intentions are linked to this browser, not to an account. If you clear this browser's data or use another device, they won't show here, but people keep praying for them.</p>
   </main>
   <script src="js/intentions.js"></script>

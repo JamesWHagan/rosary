@@ -160,8 +160,21 @@ window.Intentions = (function () {
     return api("intentions?device=" + device()).then(function (r) { return r.ok ? r.intentions : []; }).catch(function () { return []; });
   }
 
+  // "Erase my data": delete everything on the server linked to this browser, then
+  // forget everything Decade4U kept in this browser (a new anonymous key is made next time).
+  function erase() {
+    var done = offline ? Promise.resolve({ ok: true }) : api("erase", { device: device() });
+    return done.then(function (r) {
+      if (!r || !r.ok) return r || { ok: false };
+      try {
+        Object.keys(localStorage).forEach(function (k) { if (k.indexOf("decade4u.") === 0) localStorage.removeItem(k); });
+      } catch (e) {}
+      return r;
+    }, function () { return { ok: false, error: "We couldn't reach Decade4U. Please check your connection and try again." }; });
+  }
+
   function isAnonymous(it) { return !it.general && (!it.name || it.name === "Anonymous" || it.name === "Someone"); }
 
-  return { device: device, featured: featured, assign: assign, general: general, prayed: prayed, report: report,
+  return { device: device, erase: erase, featured: featured, assign: assign, general: general, prayed: prayed, report: report,
            submit: submit, mine: mine, isAnonymous: isAnonymous, offline: offline };
 })();
