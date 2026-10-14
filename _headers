@@ -1,0 +1,4 @@
+# Cloudflare Pages: make browsers check for a newer copy of these files on every visit,
+# so updates reach phones immediately (unchanged files still load from cache).
+/*
+  Cache-Control: no-cache
