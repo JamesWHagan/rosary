@@ -18,13 +18,25 @@
 
     <div class="field">
       <div class="label">How many decades?</div>
-      <div class="seg" id="decades">
-        <button type="button" data-n="1">1</button>
-        <button type="button" data-n="2">2</button>
-        <button type="button" data-n="3">3</button>
-        <button type="button" data-n="4">4</button>
-        <button type="button" data-n="5">5<small>Full rosary</small></button>
+      <div class="decade-choices" id="decades">
+        <button type="button" class="dc" data-c="one"><strong></strong><span></span></button>
+        <button type="button" class="dc" data-c="full"><strong></strong><span></span></button>
+        <button type="button" class="dc special" data-c="trad"><strong></strong><span></span></button>
+        <button type="button" class="dc special" data-c="all"><strong></strong><span></span></button>
+        <div class="dc custom" data-c="custom" role="button" tabindex="0" aria-pressed="false">
+          <div><strong></strong><span id="custom-sub"></span></div>
+          <div class="stepper">
+            <button type="button" id="custom-minus">−</button>
+            <output id="custom-n">3</output>
+            <button type="button" id="custom-plus">+</button>
+          </div>
+        </div>
       </div>
+      <div class="plan-line">
+        <p id="plan-text"></p>
+        <button type="button" class="gear" id="plan-gear" aria-expanded="false"><span aria-hidden="true">⚙</span> <span id="gear-label"></span></button>
+      </div>
+      <div class="picker" id="picker" hidden></div>
       <p class="fine" id="setup-note"></p>
     </div>
 

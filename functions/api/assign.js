@@ -1,4 +1,4 @@
-// GET /api/assign?n=3&device=KEY&for=id1,id2
+// GET /api/assign?n=3 (up to 20)&device=KEY&for=id1,id2
 // Intentions to pray for: the ones asked for first (from the home page), then the
 // least-prayed approved intentions, never your own, never one you already prayed for.
 import { json, fail, hashKey, publicView } from "../../lib/server.js";
@@ -7,7 +7,7 @@ export async function onRequestGet({ request, env }) {
   const url = new URL(request.url);
   const device = await hashKey(url.searchParams.get("device"));
   if (!device) return fail("Missing device.");
-  const n = Math.max(1, Math.min(5, Number(url.searchParams.get("n")) || 1));
+  const n = Math.max(1, Math.min(20, Number(url.searchParams.get("n")) || 1));
   const wanted = (url.searchParams.get("for") || "").split(",").filter(Boolean).slice(0, 5);
 
   let picked = [];

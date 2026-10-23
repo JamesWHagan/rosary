@@ -22,7 +22,7 @@
 
   var T = window.ROSARY_TEXT;
   var NS = "http://www.w3.org/2000/svg";
-  var STORE_KEY = "decade4u.progress.v3";
+  var STORE_KEY = "decade4u.progress.v4";
   var PREFS_KEY = "decade4u.prefs";
 
   // ---------- 1. Drawing the rosary ----------
@@ -96,68 +96,132 @@
     try { if (navigator.vibrate) navigator.vibrate(ms); } catch (e) {}
   }
 
-  // ---------- 2. The order of prayers ----------
-  function largeBeadFor(d) {
-    return d === 0 ? "P5" : "S" + (d * 11 - 1); // where decade d's Our Father is prayed
-  }
+  // ---------- 2. Which mysteries are prayed: the "plan" ----------
+  // A plan is a list with one entry per decade: { s: set key, i: mystery 0-4 }.
+  // 1 decade, Full rosary (5), Traditional (15), All the mysteries (20) or Custom (1-20).
+  var SETS = ["joyful", "luminous", "sorrowful", "glorious"];   // the order of Christ's life
+  var CHOICE_N = { one: 1, full: 5, trad: 15, all: 20 };
 
-  function buildBeadSteps(n) {
-    var full = n === 5, s = [];
-    s.push({ id: "sign", beads: ["cross"], part: "opening" });
-    if (full) {
-      s.push({ id: "creed", beads: ["cross"], part: "opening" });
-      s.push({ id: "our", beads: ["P1"], part: "opening" });
-      for (var k = 0; k < 3; k++) {
-        s.push({ id: "hail", beads: ["P" + (2 + k)], part: "opening", count: [k + 1, 3], note: T.openingNotes[k] });
-      }
-      s.push({ id: "glory", beads: ["P5"], part: "opening" });
-      s.push({ id: "fatima", beads: ["P5"], part: "opening" });
-    }
-    for (var d = 0; d < n; d++) {
-      var L = largeBeadFor(d);
-      var after = d < 4 ? largeBeadFor(d + 1) : "medal";
-      s.push({ mystery: true, beads: [L], part: "decade", d: d });
-      s.push({ id: "our", beads: [L], part: "decade", d: d });
-      for (var j = 0; j < 10; j++) {
-        s.push({ id: "hail", beads: ["S" + (d * 11 + j)], part: "decade", d: d, count: [j + 1, 10] });
-      }
-      s.push({ id: "glory", beads: [after], part: "decade", d: d });
-      s.push({ id: "fatima", beads: [after], part: "decade", d: d, endsDecade: true });
-    }
-    if (full) {
-      s.push({ id: "hhq", beads: ["medal"], part: "closing" });
-      s.push({ id: "closing", beads: ["medal"], part: "closing" });
-    }
-    s.push({ id: "sign", beads: ["cross"], part: "closing" });
-    return s;
-  }
-
-  function buildOwnRosarySteps(n) {
-    var full = n === 5, s = [];
-    s.push(full
-      ? { group: true, part: "opening", beads: ["cross", "P1", "P2", "P3", "P4"],
-          items: [["sign", 1], ["creed", 1], ["our", 1], ["hail", 3], ["glory", 1], ["fatima", 1]] }
-      : { group: true, part: "opening", beads: ["cross"], items: [["sign", 1]] });
-    for (var d = 0; d < n; d++) {
-      var list = [largeBeadFor(d)];
-      for (var j = 0; j < 10; j++) list.push("S" + (d * 11 + j));
-      s.push({ group: true, mystery: true, part: "decade", d: d, beads: list, endsDecade: true,
-               items: [["our", 1], ["hail", 10], ["glory", 1], ["fatima", 1]] });
-    }
-    s.push(full
-      ? { group: true, part: "closing", beads: ["medal", "cross"], items: [["hhq", 1], ["closing", 1], ["sign", 1]] }
-      : { group: true, part: "closing", beads: ["cross"], items: [["sign", 1]] });
-    return s;
-  }
-
-  function buildSteps(mode, n) {
-    return mode === "own" ? buildOwnRosarySteps(n) : buildBeadSteps(n);
-  }
-
-  function todaysSet() {
-    var day = new Date().getDay();
+  function setForDay(day) {
     for (var key in T.mysteries) if (T.mysteries[key].days.indexOf(day) !== -1) return key;
     return "joyful";
+  }
+  function todaysSet() { return setForDay(new Date().getDay()); }
+
+  // Today's set, then the following days' sets, skipping any already used
+  // (Friday: Sorrowful, Joyful, Glorious, Luminous).
+  function daySetOrder() {
+    var out = [], day = new Date().getDay();
+    for (var k = 0; k < 7; k++) {
+      var key = setForDay((day + k) % 7);
+      if (out.indexOf(key) === -1) out.push(key);
+    }
+    SETS.forEach(function (key) { if (out.indexOf(key) === -1) out.push(key); });
+    return out;
+  }
+  function whole(keys) {
+    var out = [];
+    keys.forEach(function (key) { for (var i = 0; i < 5; i++) out.push({ s: key, i: i }); });
+    return out;
+  }
+  function choiceN(c) { return CHOICE_N[c] || state.customN; }
+
+  // The plan for the current choice, with any mysteries picked in the settings.
+  function currentPlan() {
+    var c = state.choice;
+    if (c === "trad") return whole(["joyful", "sorrowful", "glorious"]);
+    if (c === "all") return whole(SETS);
+    if (c === "full") return whole([state.fullSet || todaysSet()]);
+    var n = choiceN(c);
+    var slots = slotsFor(c);
+    var order = whole(daySetOrder());               // the usual order, for boxes left empty
+    var used = {};
+    slots.forEach(function (m) { if (m) used[m.s + m.i] = true; });
+    var k = 0;
+    return slots.map(function (m) {
+      if (m) return m;
+      while (used[order[k].s + order[k].i]) k++;
+      used[order[k].s + order[k].i] = true;
+      return order[k++];
+    }).slice(0, n);
+  }
+  // Picked mysteries for "one" and "custom" (null = follow the usual order).
+  function slotsFor(c) {
+    var n = choiceN(c);
+    var sl = (state.slots[c] || []).slice(0, n);
+    while (sl.length < n) sl.push(null);
+    state.slots[c] = sl;
+    return sl;
+  }
+  function mysteryName(m) { return T.mysteries[m.s].list[m.i]; }
+
+  // ---------- 3. The order of prayers ----------
+  // The drawn rosary has 5 decades. Longer rosaries go round it again ("parts"):
+  // decade d is in part floor(d / 5), on the loop's decade d % 5.
+  // Opening prayers (with the Creed) only once at the start, closing prayers once at the end.
+  function largeBead(p, part) {
+    if (p === 0) return part === 0 ? "P5" : "medal";   // where the decade's Our Father is prayed
+    return "S" + (p * 11 - 1);
+  }
+  function partTitle(plan, r) {
+    var ds = plan.slice(r * 5, r * 5 + 5);
+    var same = ds.every(function (m, j) { return m.s === ds[0].s && m.i === j; });
+    if (same && ds.length === 5) return fill(T.ui.mysteriesOf, { set: T.mysteries[ds[0].s].name });
+    return fill(T.ui.decadesRange, { a: r * 5 + 1, b: r * 5 + ds.length });
+  }
+
+  function buildSteps(mode, plan) {
+    var n = plan.length, full = n >= 5, parts = Math.ceil(n / 5), last = parts - 1, s = [];
+    var own = mode === "own";
+    if (own) {
+      s.push(full
+        ? { group: true, part: "opening", round: 0, beads: ["cross", "P1", "P2", "P3", "P4"],
+            items: [["sign", 1], ["creed", 1], ["our", 1], ["hail", 3], ["glory", 1], ["fatima", 1]] }
+        : { group: true, part: "opening", round: 0, beads: ["cross"], items: [["sign", 1]] });
+    } else {
+      s.push({ id: "sign", beads: ["cross"], part: "opening", round: 0 });
+      if (full) {
+        s.push({ id: "creed", beads: ["cross"], part: "opening", round: 0 });
+        s.push({ id: "our", beads: ["P1"], part: "opening", round: 0 });
+        for (var k = 0; k < 3; k++) {
+          s.push({ id: "hail", beads: ["P" + (2 + k)], part: "opening", round: 0, count: [k + 1, 3], note: T.openingNotes[k] });
+        }
+        s.push({ id: "glory", beads: ["P5"], part: "opening", round: 0 });
+        s.push({ id: "fatima", beads: ["P5"], part: "opening", round: 0 });
+      }
+    }
+    for (var d = 0; d < n; d++) {
+      var r = Math.floor(d / 5), p = d % 5;
+      var L = largeBead(p, r);
+      if (parts > 1 && p === 0) s.push({ intro: true, part: "intro", round: r, d: d, beads: [L] });
+      if (own) {
+        var list = [L];
+        for (var j = 0; j < 10; j++) list.push("S" + (p * 11 + j));
+        s.push({ group: true, mystery: true, part: "decade", round: r, d: d, beads: list, endsDecade: true,
+                 items: [["our", 1], ["hail", 10], ["glory", 1], ["fatima", 1]] });
+        continue;
+      }
+      var after = p < 4 ? largeBead(p + 1, r) : "medal";
+      s.push({ mystery: true, beads: [L], part: "decade", round: r, d: d });
+      s.push({ id: "our", beads: [L], part: "decade", round: r, d: d });
+      for (var h = 0; h < 10; h++) {
+        s.push({ id: "hail", beads: ["S" + (p * 11 + h)], part: "decade", round: r, d: d, count: [h + 1, 10] });
+      }
+      s.push({ id: "glory", beads: [after], part: "decade", round: r, d: d });
+      s.push({ id: "fatima", beads: [after], part: "decade", round: r, d: d, endsDecade: true });
+    }
+    if (own) {
+      s.push(full
+        ? { group: true, part: "closing", round: last, beads: ["medal", "cross"], items: [["hhq", 1], ["closing", 1], ["sign", 1]] }
+        : { group: true, part: "closing", round: last, beads: ["cross"], items: [["sign", 1]] });
+    } else {
+      if (full) {
+        s.push({ id: "hhq", beads: ["medal"], part: "closing", round: last });
+        s.push({ id: "closing", beads: ["medal"], part: "closing", round: last });
+      }
+      s.push({ id: "sign", beads: ["cross"], part: "closing", round: last });
+    }
+    return s;
   }
 
   function fill(str, vars) {
@@ -172,21 +236,22 @@
   }
 
   // ---------- State ----------
-  var setKey = todaysSet();
-  var set = T.mysteries[setKey];
-  var state = { mode: "beads", n: 5, list: [], forIds: [], hide: false, done: [] };
+  // choice: "one" | "full" | "trad" | "all" | "custom"; plan: the mysteries, one per decade
+  var state = { mode: "beads", choice: "full", customN: 3, slots: {}, fullSet: null, plan: [], n: 5,
+                list: [], forIds: [], hide: false, done: [] };
+  var MAX_DECADES = 20;
   var steps = [];
   var current = 0;
 
   function assigned() { return state.list.slice(0, state.n); }
 
-  // Ask the server for intentions (5, so changing the number of decades needs no new request).
+  // Ask the server for intentions (20, so changing the number of decades needs no new request).
   var loading = 0;
   function loadList() {
     var mine = ++loading;
     state.list = [];
     renderSetup();
-    return Intentions.assign(5, state.forIds).then(function (list) {
+    return Intentions.assign(MAX_DECADES, state.forIds).then(function (list) {
       if (mine !== loading) return;
       state.list = list;
       renderSetup();
@@ -201,26 +266,69 @@
   function storeSet(key, val) { try { localStorage.setItem(key, val); } catch (e) {} }
   function storeDel(key) { try { localStorage.removeItem(key); } catch (e) {} }
 
+  // A rosary in progress is kept for 2 days, so a long one can be finished the next day.
   function save() {
-    storeSet(STORE_KEY, JSON.stringify({ step: current, set: setKey, mode: state.mode, n: state.n, list: state.list, done: state.done, at: Date.now() }));
+    storeSet(STORE_KEY, JSON.stringify({ step: current, plan: state.plan, choice: state.choice, mode: state.mode,
+      list: state.list, done: state.done, at: Date.now() }));
+  }
+  function validPlan(plan) {
+    return Array.isArray(plan) && plan.length >= 1 && plan.length <= MAX_DECADES && plan.every(function (m) {
+      return m && T.mysteries[m.s] && m.i >= 0 && m.i <= 4;
+    });
   }
   function loadSaved() {
     try {
       var s = JSON.parse(storeGet(STORE_KEY) || "null");
-      if (s && s.set === setKey && Date.now() - s.at < 12 * 3600 * 1000 && s.step > 0) return s;
+      if (s && validPlan(s.plan) && Date.now() - s.at < 48 * 3600 * 1000 && s.step > 0) return s;
     } catch (e) {}
     return null;
   }
 
   // ---------- Setup screen ----------
-  function renderSetup() {
-    Array.prototype.forEach.call(ui.decades.querySelectorAll("button"), function (b) {
-      b.setAttribute("aria-pressed", String(Number(b.dataset.n) === state.n));
+  function refreshPlan() {
+    state.plan = currentPlan();
+    state.n = state.plan.length;
+  }
+
+  // "the Sorrowful Mysteries · Joyful Mysteries 1–3", "The Assumption (Glorious)"
+  function planSummary(plan) {
+    var runs = [], cur = null;
+    plan.forEach(function (m) {
+      if (cur && cur.s === m.s && m.i === cur.b + 1) { cur.b = m.i; cur.n++; }
+      else { cur = { s: m.s, a: m.i, b: m.i, n: 1 }; runs.push(cur); }
     });
+    return runs.map(function (r) {
+      var name = T.mysteries[r.s].name;
+      if (r.n === 5) return fill(T.ui.mysteriesOf, { set: name });
+      if (r.n === 1) return T.mysteries[r.s].list[r.a] + " (" + name + ")";
+      return fill(T.ui.mysteriesRange, { set: name, a: r.a + 1, b: r.b + 1 });
+    }).join(" · ");
+  }
+
+  function renderSetup() {
+    refreshPlan();
+    Array.prototype.forEach.call(ui.decades.querySelectorAll(".dc"), function (b) {
+      b.setAttribute("aria-pressed", String(b.dataset.c === state.choice));
+    });
+    $("custom-n").textContent = state.customN;
+    $("custom-sub").textContent = fill(T.ui.choiceCustomSub, { n: state.customN });
+    $("custom-minus").disabled = state.customN <= 1;
+    $("custom-plus").disabled = state.customN >= MAX_DECADES;
+
+    var summary = planSummary(state.plan);
+    var fixed = state.choice === "trad" || state.choice === "all";
+    if (!fixed && state.plan[0].s === todaysSet()) summary += " (" + fill(T.ui.planDay, { day: T.ui.days[new Date().getDay()] }) + ")";
+    ui.planText.textContent = T.ui.planPrefix + " " + summary;
+    ui.gear.hidden = fixed;
+    if (fixed) state.pickerOpen = false;
+    ui.gear.setAttribute("aria-expanded", String(!!state.pickerOpen));
+    ui.picker.hidden = !state.pickerOpen;
+    if (state.pickerOpen) renderPicker();
+
     Array.prototype.forEach.call(ui.modes.querySelectorAll("button"), function (b) {
       b.setAttribute("aria-pressed", String(b.dataset.mode === state.mode));
     });
-    ui.setupNote.textContent = state.n === 5 ? T.ui.fullNote : T.ui.shortNote;
+    ui.setupNote.textContent = state.n >= 5 ? T.ui.fullNote : T.ui.shortNote;
     ui.assigned.innerHTML = "";
     ui.start.disabled = !state.list.length;
     if (!state.list.length) {
@@ -245,6 +353,185 @@
       ui.assigned.appendChild(li);
     });
     ui.start.textContent = fill(state.n === 1 ? T.ui.startOne : T.ui.startMany, { n: state.n });
+  }
+
+  // ---------- Choosing the mysteries (behind the ⚙ button) ----------
+  // Full rosary: choose the set; its five mysteries keep their order.
+  // 1 decade and Custom: numbered boxes, one per decade. Tap a mystery to put it in the
+  // next empty box, or drag it into any box; tap a filled box to empty it. Empty boxes
+  // follow the usual order (today's mysteries, then the following days').
+  function h(tag, cls, text) {
+    var e = document.createElement(tag);
+    if (cls) e.className = cls;
+    if (text != null) e.textContent = text;
+    return e;
+  }
+  function sameM(a, b) { return a && b && a.s === b.s && a.i === b.i; }
+
+  function renderPicker() {
+    var pk = ui.picker, today = todaysSet();
+    pk.innerHTML = "";
+    var head = h("div", "pick-head");
+    head.appendChild(h("h3", "", T.ui.pickTitle));
+    var done = h("button", "link pick-done", T.ui.pickDone);
+    done.type = "button"; done.dataset.act = "close";
+    head.appendChild(done);
+    pk.appendChild(head);
+
+    var tabsKey = state.choice === "full" ? (state.fullSet || today) : (state.pickTab || state.plan[0].s);
+    var tabs = h("div", "pick-tabs");
+    SETS.forEach(function (key) {
+      var b = h("button", "", T.mysteries[key].name);
+      b.type = "button";
+      b.dataset.tab = key;
+      b.setAttribute("aria-pressed", String(key === tabsKey));
+      if (key === today) b.appendChild(h("small", "", T.ui.pickToday));
+      tabs.appendChild(b);
+    });
+
+    if (state.choice === "full") {
+      pk.appendChild(h("p", "pick-help", T.ui.pickWhichSet));
+      pk.appendChild(tabs);
+      var ol = h("ol", "pick-locked");
+      T.mysteries[tabsKey].list.forEach(function (name) { ol.appendChild(h("li", "", name)); });
+      pk.appendChild(ol);
+      pk.appendChild(h("p", "pick-help", T.ui.pickLocked));
+      return;
+    }
+
+    var slots = slotsFor(state.choice);
+    pk.appendChild(h("p", "pick-help", T.ui.pickHelp));
+    pk.appendChild(h("div", "pick-label", T.ui.pickSlots));
+    var grid = h("div", "slots");
+    state.plan.forEach(function (m, k) {
+      var picked = !!slots[k];
+      var box = h("button", "slot" + (picked ? " picked" : ""));
+      box.type = "button";
+      box.dataset.k = k;
+      box.appendChild(h("span", "slot-n", String(k + 1)));
+      box.appendChild(h("span", "slot-name", mysteryName(m)));
+      box.appendChild(h("span", "slot-set", picked ? T.mysteries[m.s].name : T.ui.pickAuto));
+      grid.appendChild(box);
+    });
+    pk.appendChild(grid);
+    pk.appendChild(tabs);
+    var cards = h("div", "mcards");
+    T.mysteries[tabsKey].list.forEach(function (name, i) {
+      var me = { s: tabsKey, i: i };
+      var at = slots.findIndex(function (x) { return sameM(x, me); });
+      var c = h("button", "mcard" + (at !== -1 ? " used" : ""));
+      c.type = "button";
+      c.dataset.s = tabsKey; c.dataset.i = i;
+      c.appendChild(h("span", "mc-ord", T.ordinals[i]));
+      c.appendChild(h("span", "mc-name", name));
+      if (at !== -1) c.appendChild(h("span", "mc-badge", String(at + 1)));
+      cards.appendChild(c);
+    });
+    pk.appendChild(cards);
+    var reset = h("button", "link pick-reset", T.ui.pickReset);
+    reset.type = "button"; reset.dataset.act = "reset";
+    pk.appendChild(reset);
+  }
+
+  function placeCard(m, k) {           // put mystery m into box k (moving it if it was elsewhere)
+    var slots = slotsFor(state.choice);
+    var was = slots.findIndex(function (x) { return sameM(x, m); });
+    if (was !== -1) slots[was] = null;
+    slots[k] = m;
+  }
+  function tapCard(m) {
+    var slots = slotsFor(state.choice);
+    var was = slots.findIndex(function (x) { return sameM(x, m); });
+    if (was !== -1) { slots[was] = null; return; }       // tapping a chosen mystery takes it out
+    var free = slots.indexOf(null);
+    if (free === -1 && slots.length === 1) free = 0;     // 1 decade: just replace it
+    if (free === -1) { showToast(T.ui.pickFull); return; }
+    slots[free] = m;
+  }
+
+  function setupPicker() {
+    var pk = ui.picker, drag = null, lastDrag = 0;
+
+    pk.addEventListener("click", function (e) {
+      if (Date.now() - lastDrag < 120) return;   // the click that follows a drop
+      var t = e.target.closest("button");
+      if (!t) return;
+      if (t.dataset.act === "close") { state.pickerOpen = false; renderSetup(); ui.gear.focus(); return; }
+      if (t.dataset.act === "reset") { state.slots[state.choice] = []; state.fullSet = null; renderSetup(); return; }
+      if (t.dataset.tab) {
+        if (state.choice === "full") state.fullSet = t.dataset.tab; else state.pickTab = t.dataset.tab;
+        renderSetup(); return;
+      }
+      if (t.classList.contains("slot")) {
+        if (t.classList.contains("picked")) slotsFor(state.choice)[Number(t.dataset.k)] = null;
+        renderSetup(); return;
+      }
+      if (t.classList.contains("mcard")) {
+        tapCard({ s: t.dataset.s, i: Number(t.dataset.i) });
+        renderSetup();
+      }
+    });
+
+    // Dragging: with a mouse it starts when you move; on a touch screen, after a short press
+    // (so normal scrolling over the cards still works).
+    pk.addEventListener("pointerdown", function (e) {
+      var src = e.target.closest(".mcard, .slot.picked");
+      if (!src || e.button > 0) return;
+      drag = { src: src, x: e.clientX, y: e.clientY, ghost: null, ready: e.pointerType === "mouse" };
+      if (!drag.ready) drag.timer = setTimeout(function () { if (drag) { drag.ready = true; startGhost(drag.x, drag.y); buzz(10); } }, 280);
+    });
+    function startGhost(x, y) {
+      var g = drag.src.cloneNode(true);
+      g.classList.add("drag-ghost");
+      g.style.width = drag.src.offsetWidth + "px";
+      document.body.appendChild(g);
+      drag.ghost = g;
+      drag.src.classList.add("dragging");
+      moveGhost(x, y);
+    }
+    function moveGhost(x, y) {
+      drag.ghost.style.transform = "translate(" + (x - drag.src.offsetWidth / 2) + "px," + (y - 24) + "px)";
+      var over = document.elementFromPoint(x, y);
+      over = over && over.closest(".slot");
+      Array.prototype.forEach.call(pk.querySelectorAll(".slot.over"), function (o) { if (o !== over) o.classList.remove("over"); });
+      if (over && pk.contains(over)) over.classList.add("over");
+    }
+    window.addEventListener("pointermove", function (e) {
+      if (!drag) return;
+      var moved = Math.abs(e.clientX - drag.x) + Math.abs(e.clientY - drag.y);
+      if (!drag.ready) { if (moved > 10) { clearTimeout(drag.timer); drag = null; } return; }   // it's a scroll
+      if (!drag.ghost) { if (moved < 6) return; startGhost(e.clientX, e.clientY); }
+      moveGhost(e.clientX, e.clientY);
+    });
+    // while dragging on a touch screen, stop the page from scrolling
+    pk.addEventListener("touchmove", function (e) { if (drag && drag.ghost) e.preventDefault(); }, { passive: false });
+    pk.addEventListener("contextmenu", function (e) { if (e.target.closest(".mcard, .slot")) e.preventDefault(); });
+    function endDrag(e, cancel) {
+      if (!drag) return;
+      clearTimeout(drag.timer);
+      if (drag.ghost) {
+        drag.ghost.remove();
+        drag.src.classList.remove("dragging");
+        lastDrag = Date.now();
+        var over = !cancel && document.elementFromPoint(e.clientX, e.clientY);
+        over = over && over.closest(".slot");
+        if (over && pk.contains(over)) {
+          var k = Number(over.dataset.k), slots = slotsFor(state.choice);
+          if (drag.src.classList.contains("mcard")) {
+            placeCard({ s: drag.src.dataset.s, i: Number(drag.src.dataset.i) }, k);
+          } else {                                   // box onto box: swap them
+            var j = Number(drag.src.dataset.k), tmp = slots[k];
+            slots[k] = slots[j]; slots[j] = tmp;
+          }
+        }
+        drag = null;
+        renderSetup();
+        return;
+      }
+      drag = null;
+    }
+    window.addEventListener("pointerup", function (e) { endDrag(e, false); });
+    window.addEventListener("pointercancel", function (e) { endDrag(e, true); });
   }
 
   // ---------- Report an intention ----------
@@ -342,27 +629,47 @@
     var step = steps[current];
     var its = assigned();
 
-    var now = {}, prayed = {};
+    // light up the beads already prayed in this round of the rosary
+    var now = {}, prayed = {}, used = usedBeads[step.round] || {};
     step.beads.forEach(function (b) { now[b] = true; });
-    for (var k = 0; k < current; k++) steps[k].beads.forEach(function (b) { prayed[b] = true; });
+    for (var k = 0; k < current; k++) {
+      if (steps[k].round === step.round) steps[k].beads.forEach(function (b) { prayed[b] = true; });
+    }
     for (var id in beads) {
       beads[id].classList.toggle("active", !!now[id]);
       beads[id].classList.toggle("prayed", !!prayed[id] && !now[id]);
+      beads[id].classList.toggle("unused", !used[id]);
     }
 
+    var parts = Math.ceil(state.n / 5);
     if (step.part === "opening") ui.where.textContent = T.ui.opening;
     else if (step.part === "closing") ui.where.textContent = T.ui.closing;
-    else ui.where.textContent = fill(T.ui.decade, { n: step.d + 1, total: state.n }) + " · " + fill(T.ui.mysteriesToday, { set: set.name });
+    else if (step.intro) ui.where.textContent = fill(T.ui.partOf, { r: step.round + 1, total: parts });
+    else ui.where.textContent = fill(T.ui.decade, { n: step.d + 1, total: state.n }) + " · " +
+      fill(T.ui.mysteriesToday, { set: T.mysteries[state.plan[step.d].s].name });
 
     // small "for Maria" line on every prayer inside a decade
     ui.forLine.hidden = true; // the decade panel now shows who it's for
 
     ui.text.innerHTML = "";
-    ui.card.classList.toggle("is-mystery", !!step.mystery);
+    ui.card.classList.toggle("is-mystery", !!step.mystery || !!step.intro);
     ui.card.classList.toggle("is-group", !!step.group);
-    if (step.mystery) {
-      ui.kicker.textContent = fill(T.ui.mysteryTitle, { ordinal: T.ordinals[step.d], set: set.name });
-      ui.title.textContent = set.list[step.d];
+    if (step.intro) {
+      ui.kicker.textContent = fill(T.ui.partOf, { r: step.round + 1, total: parts });
+      ui.title.textContent = partTitle(state.plan, step.round);
+      var ol = document.createElement("ol");
+      ol.className = "part-list";
+      state.plan.slice(step.round * 5, step.round * 5 + 5).forEach(function (m) {
+        var li = document.createElement("li");
+        li.textContent = mysteryName(m);
+        ol.appendChild(li);
+      });
+      ui.text.appendChild(ol);
+      para(ui.text, T.ui.introHint, "hint");
+    } else if (step.mystery) {
+      var m = state.plan[step.d], ms = T.mysteries[m.s];
+      ui.kicker.textContent = fill(T.ui.mysteryTitle, { ordinal: T.ordinals[m.i], set: ms.name });
+      ui.title.textContent = mysteryName(m);
       writeIntention(ui.text, its[step.d]);
       if (step.group) writeGroup(ui.text, step);
       else para(ui.text, T.ui.mysteryHint, "hint");
@@ -394,9 +701,13 @@
   // What the middle of the rosary says when the prayers are hidden
   function renderCentre(step, its) {
     var k = "", t = "", c = "", sub = "";
-    if (step.mystery) {
-      k = fill(T.ui.mysteryShort, { ordinal: T.ordinals[step.d], set: set.name });
-      t = set.list[step.d];
+    if (step.intro) {
+      k = fill(T.ui.partOf, { r: step.round + 1, total: Math.ceil(state.n / 5) });
+      t = partTitle(state.plan, step.round);
+    } else if (step.mystery) {
+      var m = state.plan[step.d];
+      k = fill(T.ui.mysteryShort, { ordinal: T.ordinals[m.i], set: T.mysteries[m.s].name });
+      t = mysteryName(m);
       if (step.group) sub = T.ui.decadeList;
     } else if (step.group) {
       t = step.part === "opening" ? T.ui.opening : T.ui.closing;
@@ -414,7 +725,7 @@
     // the decade panel under the rosary: the mystery and the intention, on every bead of the decade
     if (step.part === "decade") {
       var it = its[step.d];
-      ui.stripMyst.textContent = set.list[step.d];
+      ui.stripMyst.textContent = mysteryName(state.plan[step.d]);
       ui.stripWho.textContent = fill(T.ui.forShort, { name: who(it) }) + ":";
       ui.stripWhat.textContent = it.intention;
       ui.strip.classList.remove("empty");
@@ -509,7 +820,7 @@
   }
 
   function savePrefs() {
-    storeSet(PREFS_KEY, JSON.stringify({ mode: state.mode, n: state.n, hide: state.hide }));
+    storeSet(PREFS_KEY, JSON.stringify({ mode: state.mode, choice: state.choice, customN: state.customN, hide: state.hide }));
   }
 
   // ---------- Finish screen ----------
@@ -546,12 +857,16 @@
     if (newIntentions || !state.list.length) loadList(); else renderSetup();
   }
 
+  var usedBeads = {};   // round -> beads used in that round (the others are faded)
   function begin(at) {
-    steps = buildSteps(state.mode, state.n);
+    state.n = state.plan.length;
+    steps = buildSteps(state.mode, state.plan);
     savePrefs();
-    var used = {};
-    steps.forEach(function (st) { st.beads.forEach(function (b) { used[b] = true; }); });
-    for (var id in beads) beads[id].classList.toggle("unused", !used[id]);
+    usedBeads = {};
+    steps.forEach(function (st) {
+      var u = usedBeads[st.round] = usedBeads[st.round] || {};
+      st.beads.forEach(function (b) { u[b] = true; });
+    });
     ui.card.classList.toggle("tap-next", state.mode === "beads");
     ui.ring.classList.toggle("tap-next", state.mode === "beads");
     applyHide();
@@ -587,6 +902,7 @@
       kicker: $("kicker"), title: $("prayer-title"), text: $("prayer-text"),
       bar: $("bar"), back: $("back"), next: $("next"), toast: $("toast"),
       doneLead: $("done-lead"), thanks: $("thanks"),
+      planText: $("plan-text"), gear: $("plan-gear"), picker: $("picker"),
       hide: $("hide"), ring: $("ring"), hint: $("gesture-hint"), stripMyst: $("strip-myst"), strip: $("strip"), stripWho: $("strip-who"), stripWhat: $("strip-what")
     };
     draw($("rosary"));
@@ -594,19 +910,40 @@
     try {
       var prefs = JSON.parse(storeGet(PREFS_KEY) || "null");
       if (prefs && (prefs.mode === "beads" || prefs.mode === "own")) state.mode = prefs.mode;
-      if (prefs && prefs.n >= 1 && prefs.n <= 5) state.n = prefs.n;
+      if (prefs && (prefs.choice in CHOICE_N || prefs.choice === "custom")) state.choice = prefs.choice;
+      if (prefs && prefs.customN >= 1 && prefs.customN <= MAX_DECADES) state.customN = prefs.customN;
+      if (prefs && !prefs.choice && prefs.n >= 1 && prefs.n <= 5) chooseCount(prefs.n);   // older saved settings
       if (prefs && typeof prefs.hide === "boolean") state.hide = prefs.hide;
     } catch (e) {}
 
-    ui.decades.addEventListener("click", function (e) {
-      var b = e.target.closest("button");
-      if (b) { state.n = Number(b.dataset.n); renderSetup(); }
+    // the five choices
+    [["one", "choiceOne", "choiceOneSub"], ["full", "choiceFull", "choiceFullSub"], ["trad", "choiceTrad", "choiceTradSub"],
+     ["all", "choiceAll", "choiceAllSub"], ["custom", "choiceCustom", null]].forEach(function (c) {
+      var box = ui.decades.querySelector('[data-c="' + c[0] + '"]');
+      box.querySelector("strong").textContent = T.ui[c[1]];
+      if (c[2]) box.querySelector("span").textContent = T.ui[c[2]];
     });
+    $("custom-minus").setAttribute("aria-label", T.ui.fewer);
+    $("custom-plus").setAttribute("aria-label", T.ui.more);
+    $("gear-label").textContent = T.ui.gear;
+    ui.decades.addEventListener("click", function (e) {
+      var b = e.target.closest(".dc");
+      if (!b) return;
+      if (e.target.id === "custom-minus") state.customN = Math.max(1, state.customN - 1);
+      if (e.target.id === "custom-plus") state.customN = Math.min(MAX_DECADES, state.customN + 1);
+      state.choice = b.dataset.c;
+      renderSetup();
+    });
+    ui.decades.querySelector(".custom").addEventListener("keydown", function (e) {
+      if (e.target === e.currentTarget && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); state.choice = "custom"; renderSetup(); }
+    });
+    ui.gear.addEventListener("click", function () { state.pickerOpen = !state.pickerOpen; renderSetup(); });
+    setupPicker();
     ui.modes.addEventListener("click", function (e) {
       var b = e.target.closest("button");
       if (b) { state.mode = b.dataset.mode; renderSetup(); }
     });
-    ui.start.addEventListener("click", function () { begin(0); });
+    ui.start.addEventListener("click", function () { refreshPlan(); begin(0); });
 
     ui.next.addEventListener("click", next);
     ui.back.addEventListener("click", function () { show(current - 1); });
@@ -660,20 +997,21 @@
     // or ?for=id1,id2 ("Pray for them" on the home page).
     var params = new URLSearchParams(location.search);
     var askN = Number(params.get("n"));
-    var forIds = (params.get("for") || "").split(",").filter(Boolean).slice(0, 5);
-    if (forIds.length || (askN >= 1 && askN <= 5)) {
+    var forIds = (params.get("for") || "").split(",").filter(Boolean).slice(0, MAX_DECADES);
+    if (forIds.length || (askN >= 1 && askN <= MAX_DECADES)) {
       history.replaceState(null, "", location.pathname); // so a reload doesn't restart it
       state.forIds = forIds;
-      state.n = forIds.length ? forIds.length : askN;
+      chooseCount(forIds.length ? forIds.length : askN);
       openSetup(true);
       return;
     }
 
     var saved = loadSaved();
-    if (saved && (saved.mode === "beads" || saved.mode === "own") && saved.n >= 1 && saved.n <= 5 && saved.list && saved.list.length) {
-      state.mode = saved.mode; state.n = saved.n; state.list = saved.list;
+    if (saved && (saved.mode === "beads" || saved.mode === "own") && saved.list && saved.list.length >= saved.plan.length) {
+      state.mode = saved.mode; state.plan = saved.plan; state.list = saved.list;
+      if (saved.choice) state.choice = saved.choice;
       state.done = Array.isArray(saved.done) ? saved.done : [];
-      begin(Math.min(saved.step, buildSteps(state.mode, state.n).length - 1));
+      begin(Math.min(saved.step, buildSteps(state.mode, state.plan).length - 1));
       ui.toast.textContent = T.ui.resumed;
       ui.toast.hidden = false;
       setTimeout(function () { ui.toast.hidden = true; }, 3500);
@@ -682,5 +1020,12 @@
     }
   });
 
-  window.__rosary = { stepsFor: buildSteps };
+  // a number of decades -> the matching choice (1 decade, Full rosary, ... or Custom)
+  function chooseCount(n) {
+    var map = { 1: "one", 5: "full", 15: "trad", 20: "all" };
+    state.choice = map[n] || "custom";
+    if (!map[n]) state.customN = n;
+  }
+
+  window.__rosary = { stepsFor: buildSteps, plan: function () { return state.plan; } };
 })();

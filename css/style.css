@@ -458,7 +458,7 @@ body {
   .setup > :nth-child(3) { grid-area: lead; }
   .setup > :nth-child(4) { grid-area: dec; }
   .setup > :nth-child(5) { grid-area: modes; }
-  .setup > :nth-child(6) { grid-area: pray; }
+  .setup > :nth-child(6) { grid-area: pray; align-self: start; align-content: start; }
   .setup > :nth-child(7) { grid-area: start; align-self: start; }
   .setup .start { position: static; box-shadow: none; }
 
@@ -624,3 +624,97 @@ html:has(.pray:not([hidden])), body:has(.pray:not([hidden])) { overscroll-behavi
 .erase-acts { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
 .btn.danger { border-color: #c0392b; color: #c0392b; }
 .erase-done { color: var(--muted); line-height: 1.6; }
+
+/* ---------- how many decades: the five choices ---------- */
+.decade-choices { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.dc {
+  appearance: none; font: inherit; color: var(--text); text-align: left; cursor: pointer;
+  background: var(--surface); border: 1px solid var(--line); border-radius: 14px;
+  padding: 12px 14px; display: grid; gap: 2px; align-content: center; min-height: 64px;
+  transition: border-color .2s, background .2s, transform .08s;
+}
+.dc:active { transform: scale(.98); }
+.dc strong { font-size: 1.02rem; font-weight: 600; }
+.dc span { font-size: .78rem; color: var(--muted); line-height: 1.35; }
+.dc[aria-pressed="true"] { background: var(--glow); border-color: var(--glow); color: var(--on-glow); }
+.dc[aria-pressed="true"] span { color: var(--on-glow); }
+.dc:focus-visible { outline: 3px solid var(--glow); outline-offset: 2px; }
+/* 15 and 20: golden, a little special */
+.dc.special {
+  border-color: color-mix(in srgb, var(--glow) 55%, var(--line));
+  background: linear-gradient(160deg, color-mix(in srgb, var(--glow) 16%, var(--surface)), var(--surface));
+  box-shadow: 0 0 16px color-mix(in srgb, var(--glow) 18%, transparent);
+}
+.dc.special strong::before { content: "✦ "; color: var(--glow-text); }
+.dc.special[aria-pressed="true"] { background: var(--glow); }
+.dc.special[aria-pressed="true"] strong::before { color: var(--on-glow); }
+.dc.custom { grid-column: 1 / -1; grid-template-columns: 1fr auto; align-items: center; gap: 10px; }
+.dc.custom > div:first-child { display: grid; gap: 2px; }
+.stepper { display: flex; align-items: center; gap: 4px; }
+.stepper button {
+  appearance: none; width: 40px; height: 40px; border-radius: 50%; font: inherit; font-size: 1.3rem; line-height: 1;
+  border: 1px solid var(--bead-edge); background: var(--surface); color: var(--text); cursor: pointer;
+}
+.stepper button:disabled { opacity: .35; cursor: default; }
+.stepper output { min-width: 2ch; text-align: center; font-size: 1.25rem; font-weight: 600; }
+.dc.custom[aria-pressed="true"] .stepper button { border-color: var(--on-glow); }
+
+.plan-line { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; }
+.plan-line p { font-size: .9rem; line-height: 1.45; color: var(--text); }
+.gear {
+  appearance: none; font: inherit; font-size: .82rem; white-space: nowrap; cursor: pointer; color: var(--muted);
+  background: none; border: 1px solid var(--line); border-radius: 999px; padding: 6px 12px;
+}
+.gear[aria-expanded="true"] { border-color: var(--glow); color: var(--text); }
+
+/* ---------- the mystery picker ---------- */
+.picker { background: var(--surface); border: 1px solid var(--glow); border-radius: 16px; padding: 14px; display: grid; gap: 12px; }
+.pick-head { display: flex; justify-content: space-between; align-items: center; }
+.pick-head h3 { font-family: "Cormorant Garamond", Georgia, serif; font-size: 1.35rem; font-weight: 600; }
+.pick-done { font-weight: 600; color: var(--glow-text); font-size: .95rem; }
+.pick-help { font-size: .84rem; color: var(--muted); line-height: 1.45; }
+.pick-label { font-size: .75rem; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+.pick-tabs { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+.pick-tabs button {
+  appearance: none; font: inherit; font-size: .8rem; cursor: pointer; color: var(--text);
+  background: var(--bg); border: 1px solid var(--line); border-radius: 10px; padding: 8px 2px; display: grid; gap: 1px;
+}
+.pick-tabs button small { font-size: .62rem; color: var(--glow-text); }
+.pick-tabs button[aria-pressed="true"] { background: var(--glow); border-color: var(--glow); color: var(--on-glow); }
+.pick-tabs button[aria-pressed="true"] small { color: var(--on-glow); }
+.pick-locked { padding-left: 22px; display: grid; gap: 4px; line-height: 1.4; }
+.slots { display: grid; grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); gap: 6px; }
+.slot, .mcard {
+  appearance: none; font: inherit; color: var(--text); text-align: left; cursor: pointer; position: relative;
+  -webkit-user-select: none; user-select: none; -webkit-touch-callout: none;
+}
+.slot {
+  border: 1.5px dashed var(--line); background: var(--bg); border-radius: 10px; padding: 6px 8px 7px;
+  display: grid; gap: 1px; min-height: 64px; align-content: start;
+}
+.slot-n { font-size: .7rem; font-weight: 600; color: var(--muted); }
+.slot-name { font-size: .76rem; line-height: 1.25; color: var(--muted); }
+.slot-set { font-size: .62rem; color: var(--muted); font-style: italic; }
+.slot.picked { border-style: solid; border-color: var(--glow); background: color-mix(in srgb, var(--glow) 14%, var(--surface)); }
+.slot.picked .slot-name { color: var(--text); }
+.slot.picked .slot-set { font-style: normal; color: var(--glow-text); }
+.slot.over { outline: 3px solid var(--glow); outline-offset: 1px; }
+.mcards { display: grid; gap: 6px; }
+.mcard {
+  border: 1px solid var(--line); background: var(--bg); border-radius: 12px; padding: 10px 40px 10px 12px;
+  display: grid; gap: 1px;
+}
+.mc-ord { font-size: .68rem; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; }
+.mc-name { font-size: .95rem; line-height: 1.3; }
+.mcard.used { border-color: var(--glow); background: color-mix(in srgb, var(--glow) 10%, var(--surface)); }
+.mc-badge {
+  position: absolute; right: 10px; top: 50%; transform: translateY(-50%); width: 24px; height: 24px; border-radius: 50%;
+  background: var(--glow); color: var(--on-glow); font-size: .78rem; font-weight: 600; display: grid; place-content: center;
+}
+.dragging { opacity: .4; }
+.drag-ghost {
+  position: fixed; left: 0; top: 0; z-index: 50; pointer-events: none; margin: 0;
+  box-shadow: 0 10px 28px rgba(0,0,0,.25); border-color: var(--glow) !important; opacity: .95;
+}
+.pick-reset { justify-self: center; font-size: .85rem; }
+.part-list { padding-left: 22px; display: grid; gap: 6px; margin: 4px 0 6px; font-size: 1.05rem; line-height: 1.4; }
